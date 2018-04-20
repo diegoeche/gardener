@@ -10,6 +10,8 @@ app.config['SECRET_KEY'] = '123456790'
 # Create in-memory database
 app.config['DATABASE_FILE'] = 'sample_db.sqlite'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE_FILE']
+
+
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
@@ -32,7 +34,7 @@ class SensorData(db.Model):
 
 @app.route('/')
 def dashboard():
-    return render_template('dashboard.html', name="Diego")
+    return render_template('dashboard.html', sensors=["Humidity"])
 
 if __name__ == '__main__':
     admin = Admin(app)

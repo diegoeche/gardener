@@ -9,3 +9,7 @@ window.chartColors = {
 	purple: 'rgb(153, 102, 255)',
 	grey: 'rgb(201, 203, 207)'
 };
+
+window.randomScalingFactor = function() {
+  return Math.round((Math.random() * 200) - 100);
+};

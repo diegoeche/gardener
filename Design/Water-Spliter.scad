@@ -36,11 +36,6 @@ module servo() {
 };
 // $fn = 50;
 
-difference() {
-  x = 20;
-  translate([-x/2,-x,0]) cube([x,x * 2, x/3]);
-  translate([-3,0,-0.1]) arm(6, 15, 2, 1);
- }
 union() {    
     difference() {
         union() {
@@ -79,7 +74,7 @@ union() {
     }
 }
 
-translate([0,0, (-2 * layer_h - 0) - 10]) difference() {
+translate([0,0, (-2 * layer_h - 0)]) difference() {
   union() {
     difference() {
       cylinder(r=radius, h=layer_h * 2);

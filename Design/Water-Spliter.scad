@@ -36,7 +36,7 @@ module servo() {
 };
 // $fn = 50;
 
-*difference() {
+difference() {
   x = 20;
   translate([-x/2,-x,0]) cube([x,x * 2, x/3]);
   translate([-3,0,-0.1]) arm(6, 15, 2, 1);
@@ -51,7 +51,7 @@ union() {
               translate([0,0,layer_h * 0.7 + i * h]) cylinder(r=radius + (i*h), h);
              }
             
-            !translate([0,0,-layer_h - 1]) difference() {
+            translate([0,0,-layer_h - 1]) difference() {
                 cylinder(r=radius + offset + border, h=layer_h * 2);
                 translate([0,0,-0.1]) cylinder(r=radius + offset, h=(layer_h * 2) + 0.2);
             }
@@ -79,7 +79,7 @@ union() {
     }
 }
 
-translate([0,0, (-2 * layer_h - 0)]) difference() {
+translate([0,0, (-2 * layer_h - 0) - 10]) difference() {
   union() {
     difference() {
       cylinder(r=radius, h=layer_h * 2);

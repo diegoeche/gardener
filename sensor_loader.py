@@ -1,12 +1,17 @@
 import serial, time
+from app import *
 
-ser = serial.Serial('/dev/tty.wchusbserial1410', 9600)
+ser = serial.Serial('/dev/tty.wchusbserial1420', 9600)
+
+sensor_buffer = []
 
 while 1:
     serial_line = ser.readline()
-    print(serial_line) # If using Python 2.x use: print serial_line
-    # Do some other work on the data
-    time.sleep(0.5) # sleep 5 minutes
-    # Loop restarts once the sleep is finished
+    print(serial_line)
+    sd = SensorData(sensor_id=1, value=float(serial_line))
+    db.session.add(sd)
+    db.session.commit()
+    time.sleep(0.1)
+
 
 ser.close() # Only executes once the loop exits

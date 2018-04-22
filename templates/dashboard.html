@@ -6,8 +6,13 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
     <script src="/static/utils.js"></script>
     <script src="/static/Chart.bundle.js"></script>
+    <script>
+      window.sensor = {
+        "name": "{{sensors[0]}}",
+        "data": {{sensor_data|json}}
+      }
+    </script>
     <script src="/static/init.js"></script>
-
     <style>
       canvas{
       -moz-user-select: none;

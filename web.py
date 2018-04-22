@@ -1,40 +1,20 @@
 from flask import Flask, render_template
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.admin import Admin
-from flask.ext.admin.contrib.sqla import ModelView
-
-app = Flask(__name__)
-# Create dummy secrey key so we can use sessions
-app.config['SECRET_KEY'] = '123456790'
-
-# Create in-memory database
-app.config['DATABASE_FILE'] = 'sample_db.sqlite'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE_FILE']
-
-
-app.config['SQLALCHEMY_ECHO'] = True
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    email = db.Column(db.String(128))
-
-class Sensor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref=db.backref('users', lazy=True))
-
-class SensorData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    value = db.Column(db.Float)
-    sensor_id = db.Column(db.Integer, db.ForeignKey('sensor.id'))
-    sensor = db.relationship('Sensor', backref=db.backref('sensors', lazy=True))
+from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+from app import *
+import json
 
 @app.route('/')
 def dashboard():
-    return render_template('dashboard.html', sensors=["Humidity"])
+    data = [{"value": (1024 - sd.value) / 1024,
+             "time": sd.measured_at.timestamp()} for sd in SensorData.query.all()]
+
+    return render_template(
+        'dashboard.html',
+        sensors=["Humidity"],
+        sensor_data=data
+    )
 
 if __name__ == '__main__':
     admin = Admin(app)

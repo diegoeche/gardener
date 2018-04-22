@@ -1,21 +1,29 @@
-var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+console.log(window.sensor.data)
+
+var data = [
+      randomScalingFactor(),
+      randomScalingFactor(),
+      randomScalingFactor(),
+      randomScalingFactor(),
+      randomScalingFactor(),
+      randomScalingFactor(),
+      randomScalingFactor()
+]
+
+
+
+var data = window.sensor.data.map(function (x) {return (x.value);})
+var labels = window.sensor.data.map(function (x) {return x.time.toString();})
+
 var config = {
   type: 'line',
   data: {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: labels,
     datasets: [{
-      label: 'Humidity',
+      label: window.sensor.name,
       backgroundColor: window.chartColors.blue,
       borderColor: window.chartColors.blue,
-      data: [
-	randomScalingFactor(),
-	randomScalingFactor(),
-	randomScalingFactor(),
-	randomScalingFactor(),
-	randomScalingFactor(),
-	randomScalingFactor(),
-	randomScalingFactor()
-      ],
+      data: data,
       fill: false,
     }]
   },

@@ -6,10 +6,21 @@ from app import *
 import datetime
 import json
 
+def chunks(l, n):
+    n = max(1, n)
+    return (l[i:i+n] for i in xrange(0, len(l), n))
+
 @app.route('/')
 def dashboard():
-    data = [{"value": (1024 - sd.value) / 1024,
-             "time": sd.measured_at.strftime("%s")} for sd in SensorData.query.all()]
+    query = SensorData.query.all()
+    values = [(1024 - sd.value) / 1024 for sd in query]
+    times  = [int(sd.measured_at.strftime("%s")) for sd in query]
+    size = len(query)/1000
+    values = [sum(chunk)/float(len(chunk)) for chunk in chunks(values, size)]
+    times = [sum(chunk)/float(len(chunk)) for chunk in chunks(times, size)]
+
+    data = [{"value": value,
+             "time": time } for (value, time) in zip(values, times)]
 
     return render_template(
         'dashboard.html',

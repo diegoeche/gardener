@@ -1,24 +1,11 @@
-console.log(window.sensor.data)
-
-var data = [
-      randomScalingFactor(),
-      randomScalingFactor(),
-      randomScalingFactor(),
-      randomScalingFactor(),
-      randomScalingFactor(),
-      randomScalingFactor(),
-      randomScalingFactor()
-]
-
-
-
-var data = window.sensor.data.map(function (x) {return (x.value);})
-var labels = window.sensor.data.map(function (x) {return x.time.toString();})
+var data = window.sensor.data.map(function (x) {
+  return { y:x.value, x: new Date(x.time * 1000) };
+})
 
 var config = {
   type: 'line',
   data: {
-    labels: labels,
+    // labels: labels,
     datasets: [{
       label: window.sensor.name,
       backgroundColor: window.chartColors.blue,
@@ -43,6 +30,7 @@ var config = {
     },
     scales: {
       xAxes: [{
+	type: "time",
 	display: true,
 	scaleLabel: {
 	  display: true,
@@ -59,6 +47,8 @@ var config = {
     }
   }
 };
+
+
 window.onload = function() {
   var ctx = document.getElementById('canvas').getContext('2d');
   window.myLine = new Chart(ctx, config);

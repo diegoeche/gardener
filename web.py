@@ -8,7 +8,7 @@ import json
 @app.route('/')
 def dashboard():
     data = [{"value": (1024 - sd.value) / 1024,
-             "time": sd.measured_at.timestamp()} for sd in SensorData.query.all()]
+             "time": sd.measured_at} for sd in SensorData.query.all()]
 
     return render_template(
         'dashboard.html',

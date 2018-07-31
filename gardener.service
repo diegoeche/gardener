@@ -1,0 +1,13 @@
+[Unit]
+Description=Gardener Service
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/gardener
+ExecStart=/bin/bash /home/pi/gardener/start.sh
+Restart=on-failure # or always, on-abort, etc
+
+[Install]
+WantedBy=multi-user.target

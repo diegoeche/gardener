@@ -1,7 +1,9 @@
+import os
 import serial, time
 from app import *
 
-ser = serial.Serial('/dev/tty.wchusbserial1420', 9600)
+SENSOR_PATH=os.environ['SENSOR']
+ser = serial.Serial(SENSOR_PATH, 9600)
 
 sensor_buffer = []
 

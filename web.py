@@ -5,22 +5,21 @@ from flask_admin.contrib.sqla import ModelView
 from app import *
 import datetime
 import json
-
-def chunks(l, n):
-    n = max(1, n)
-    return (l[i:i+n] for i in xrange(0, len(l), n))
+from  sqlalchemy.sql.expression import func, select
 
 @app.route('/')
 def dashboard():
-    query = SensorData.query.all()
-    values = [(1024 - sd.value) / 1024 for sd in query]
-    times  = [int(sd.measured_at.strftime("%s")) for sd in query]
-    size = len(query)/1000
-    values = [sum(chunk)/float(len(chunk)) for chunk in chunks(values, size)]
-    times = [sum(chunk)/float(len(chunk)) for chunk in chunks(times, size)]
+    avg_value = func.avg(SensorData.value).label("value")
+    avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
+    group = func.strftime('%HH-%MM', SensorData.measured_at)
+    query = db.session.query(avg_value, avg_time).group_by(group).order_by("measured_at")
 
-    data = [{"value": value,
-             "time": time } for (value, time) in zip(values, times)]
+    data = [
+        {
+            "value": (1024 - value) / 1024,
+            "time": time
+        } for (value, time) in query.all()
+    ]
 
     return render_template(
         'dashboard.html',

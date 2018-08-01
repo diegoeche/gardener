@@ -9,10 +9,11 @@ sensor_buffer = []
 
 while 1:
     serial_line = ser.readline()
-    print(serial_line)
-    sd = SensorData(sensor_id=1, value=float(serial_line))
-    db.session.add(sd)
-    db.session.commit()
+    value = float(serial_line)
+    if (value <= 1024):
+        sd = SensorData(sensor_id=1, value=float(serial_line))
+        db.session.add(sd)
+        db.session.commit()
     time.sleep(0.1)
 
 

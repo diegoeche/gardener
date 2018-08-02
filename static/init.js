@@ -95,14 +95,16 @@ function loadData(page, chart) {
 var allDataLoaded = false;
 
 function loadInParallel(i) {
+  var before = new Date()
   $.when(
     loadData(i, chart),
     loadData(i + 1, chart),
     loadData(i + 2, chart),
     loadData(i + 3, chart)
   ).done(function (a1,a2,a3,a4) {
+    console.log((new Date()).getTime() - before.getTime())
+
     if(a3[0].length > 0) {
-      console.log(i)
       loadInParallel(i+4)
     }
     addDataToChart(chart, a1[0])
@@ -122,6 +124,4 @@ $(function () {
 
   var i = 0;
   loadInParallel(0);
-
-  console.log("here?")
 })

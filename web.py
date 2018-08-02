@@ -7,15 +7,10 @@ import datetime
 import json
 from  sqlalchemy.sql.expression import func, select
 
-@app.route('/api', methods=['GET'])
-def api():
-    page = request.args.get('page')
-    if page is None:
-        page = 0
+@cache.memoize(timeout=60)
+def query(page):
     page = int(page)
-
     subquery_size = 25000
-
     bucket_size = (60) * 2
     avg_value = func.avg(SensorData.value).label("value")
     avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
@@ -30,7 +25,16 @@ def api():
             "time": time
         } for (value, time) in query.all()
     ]
+
     return jsonify(data)
+
+@app.route('/api', methods=['GET'])
+def api():
+    page = request.args.get('page')
+    if page is None:
+        page = 0
+
+    return query(page)
 
 
 @app.route('/')

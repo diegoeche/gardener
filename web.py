@@ -2,10 +2,16 @@ from flask import Flask, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from app import *
+
+from filelock import Timeout, FileLock
+from  sqlalchemy.sql.expression import func, select
+
+import time
 import datetime
 import json
-from  sqlalchemy.sql.expression import func, select
+
+from app import *
+from gardener import move_from_to
 
 @cache.memoize(timeout=60*5)
 def query(page):
@@ -36,6 +42,23 @@ def api():
 
     return query(page)
 
+
+@app.route('/gardener/test_move', methods=['POST'])
+def test_move():
+    lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
+    gardener_lock = FileLock(lock_path, timeout=100)
+    try:
+        gardener_lock.acquire(timeout=0.1)
+        move_from_to(0,5)
+        return jsonify({ "status": "ok" })
+    except Timeout:
+        return jsonify({ "status": "locked" })
+    finally:
+        gardener_lock.release()
+
+@app.route('/gardener')
+def gardener():
+    return render_template('gardener.html')
 
 @app.route('/')
 def dashboard():

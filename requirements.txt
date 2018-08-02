@@ -3,3 +3,4 @@ Flask-Admin
 Flask-SQLAlchemy
 pyserial
 Flask-Caching
+filelock

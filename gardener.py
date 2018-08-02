@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from Raspi_PWM_Servo_Driver import PWM
 from Raspi_MotorHAT import Raspi_MotorHAT, Raspi_DCMotor
 
@@ -23,7 +21,9 @@ servoMin = 150  # Min pulse length out of 4096
 servoMax = 600  # Max pulse length out of 4096
 
 offset = 45
-pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+
+pwm.setPWMFreq(60)
+
 myMotor = mh.getMotor(2)
 
 # 12V instead of 14V!
@@ -32,12 +32,10 @@ myMotor.setSpeed(220)
 def hose(n):
         angles  = [85,85,81,76,75,75]
         new_position = (servoMax - offset) - (n * angles[n])
-        # print(new_position)
         pwm.setPWM(0, 0, new_position)
         time.sleep(1.0)
 
 def pumpWater(n):
-        # print("Pumping")
         myMotor.run(Raspi_MotorHAT.BACKWARD);
         time.sleep(n)
         myMotor.run(Raspi_MotorHAT.RELEASE);
@@ -52,8 +50,8 @@ def move_from_to(start, end):
 
 
 
-while(True):
-  move_from_to(0,5)
+# while(True):
+#   move_from_to(0,5)
 
 # count = 0
 # while(True):

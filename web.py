@@ -11,7 +11,7 @@ from  sqlalchemy.sql.expression import func, select
 def dashboard():
     avg_value = func.avg(SensorData.value).label("value")
     avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
-    group = func.strftime('%HH-%MM', SensorData.measured_at)
+    group = func.strftime('%s', SensorData.measured_at) / (60 * 5)
     query = db.session.query(avg_value, avg_time).group_by(group).order_by("measured_at")
 
     data = [

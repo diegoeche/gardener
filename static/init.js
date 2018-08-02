@@ -69,35 +69,59 @@ var config = {
 
 var chart;
 
-function loadData(page, chart) {
-  $.get("/api?page=" + page, function(data) {
-    if(data.length > 0) {
-      console.log(data)
-      var processedData = processData(data)
-      var averageData = chunk(processedData, 20).map(function (x) {
-	var sumV = x.reduce(function(a,b) {return a + b.y }, 0)
-	var sumT = x.reduce(function(a,b) {return a + b.x.getTime() }, 0)
-	return {
-	  x: new Date(sumT / x.length),
-	  y: sumV / x.length
-	}
-      })
-
-      var points = chart.data.datasets[0]
-      var averages = chart.data.datasets[1]
-
-      processedData.forEach((element) => points.data.push(element))
-      averageData.forEach((element) => averages.data.push(element))
-
-      chart.update()
-      loadData(page + 1, chart)
+function addDataToChart(chart, data) {
+  var processedData = processData(data)
+  var averageData = chunk(processedData, 20).map(function (x) {
+    var sumV = x.reduce(function(a,b) {return a + b.y }, 0)
+    var sumT = x.reduce(function(a,b) {return a + b.x.getTime() }, 0)
+    return {
+      x: new Date(sumT / x.length),
+      y: sumV / x.length
     }
-  });
+  })
+
+  var points = chart.data.datasets[0]
+  var averages = chart.data.datasets[1]
+
+  processedData.forEach((element) => points.data.push(element))
+  averageData.forEach((element) => averages.data.push(element))
+}
+
+
+function loadData(page, chart) {
+  return $.get("/api?page=" + page)
+}
+
+var allDataLoaded = false;
+
+function loadInParallel(i) {
+  $.when(
+    loadData(i, chart),
+    loadData(i + 1, chart),
+    loadData(i + 2, chart),
+    loadData(i + 3, chart)
+  ).done(function (a1,a2,a3,a4) {
+    if(a3[0].length > 0) {
+      console.log(i)
+      loadInParallel(i+4)
+    }
+    addDataToChart(chart, a1[0])
+    chart.update()
+    addDataToChart(chart, a2[0])
+    chart.update()
+    addDataToChart(chart, a3[0])
+    chart.update()
+    addDataToChart(chart, a4[0])
+    chart.update()
+  })
 }
 
 $(function () {
   var ctx = document.getElementById('canvas').getContext('2d');
   chart = new Chart(ctx, config);
-  loadData(0, chart);
+
+  var i = 0;
+  loadInParallel(0);
+
   console.log("here?")
 })

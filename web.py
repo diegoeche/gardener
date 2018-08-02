@@ -14,13 +14,13 @@ def api():
         page = 0
     page = int(page)
 
-    subquery_size = 50000
+    subquery_size = 25000
 
     bucket_size = (60) * 2
     avg_value = func.avg(SensorData.value).label("value")
     avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
     group = func.strftime('%s', SensorData.measured_at) / bucket_size
-    subquery = db.session.query(SensorData.id).order_by("measured_at").offset(page * subquery_size).limit(100000)
+    subquery = db.session.query(SensorData.id).order_by("measured_at")
     paginated_subquery = subquery.offset(page * subquery_size).limit(subquery_size)
     query = db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)).group_by(group)
 

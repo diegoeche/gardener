@@ -50,17 +50,19 @@ def move_from_to(start, end):
         for i in range(end, start, -1):
                 hose(i)
 
-# while(True):
-#   move_from_to(0,5)
 
-count = 0
+
 while(True):
-        count = count + 1
-        print(count, " iteration")
-        hose(1)
-        pumpWater(3)
-        hose(2)
-        pumpWater(2)
-        for i in range(0, 5):
-                print(i, " minutes")
-                time.sleep(60)
+  move_from_to(0,5)
+
+# count = 0
+# while(True):
+#         count = count + 1
+#         print(count, " iteration")
+#         hose(1)
+#         pumpWater(3)
+#         hose(2)
+#         pumpWater(2)
+#         for i in range(0, 5):
+#                 print(i, " minutes")
+#                 time.sleep(60)

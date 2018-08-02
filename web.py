@@ -7,7 +7,7 @@ import datetime
 import json
 from  sqlalchemy.sql.expression import func, select
 
-@cache.memoize(timeout=60)
+@cache.memoize(timeout=60*5)
 def query(page):
     page = int(page)
     subquery_size = 25000

@@ -121,7 +121,9 @@ function loadInParallel(i) {
 $(function () {
   var ctx = document.getElementById('canvas').getContext('2d');
   chart = new Chart(ctx, config);
-
+  $(".dropdown-item").click(function () {
+    console.log($(this).text())
+  })
   var i = 0;
   loadInParallel(0);
 })

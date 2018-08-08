@@ -27,8 +27,8 @@ var config = {
     },
     {
       label: "Average",
-      backgroundColor: window.chartColors.red,
-      borderColor: window.chartColors.red,
+      backgroundColor: window.chartColors.purple,
+      borderColor: window.chartColors.purple,
       data: [],
       fill: false
     }]
@@ -53,14 +53,19 @@ var config = {
 	display: true,
 	scaleLabel: {
 	  display: true,
-	  labelString: 'Time'
+	  labelString: ''
+	},
+	time: {
+	  displayFormats: {
+            hour: 'MMM D - hA'
+          }
 	}
       }],
       yAxes: [{
 	display: true,
 	scaleLabel: {
 	  display: true,
-	  labelString: 'Value'
+	  labelString: ''
 	}
       }]
     }
@@ -88,24 +93,24 @@ function addDataToChart(chart, data) {
 }
 
 
-function loadData(page, chart) {
-  return $.get("/api?page=" + page)
+function loadData(page, chart, period) {
+  var url = "/api?page=" + page + "&period=" + period
+  console.log(url)
+  return $.get(url)
 }
 
-var allDataLoaded = false;
-
-function loadInParallel(i) {
+function loadInParallel(i, period) {
   var before = new Date()
   $.when(
-    loadData(i, chart),
-    loadData(i + 1, chart),
-    loadData(i + 2, chart),
-    loadData(i + 3, chart)
+    loadData(i,     chart, period),
+    loadData(i + 1, chart, period),
+    loadData(i + 2, chart, period),
+    loadData(i + 3, chart, period)
   ).done(function (a1,a2,a3,a4) {
     console.log((new Date()).getTime() - before.getTime())
 
     if(a3[0].length > 0) {
-      loadInParallel(i+4)
+      loadInParallel(i+4, period)
     }
     addDataToChart(chart, a1[0])
     chart.update()
@@ -121,9 +126,21 @@ function loadInParallel(i) {
 $(function () {
   var ctx = document.getElementById('canvas').getContext('2d');
   chart = new Chart(ctx, config);
+  var period = location.hash.substr(1) || "historical"
+
   $(".dropdown-item").click(function () {
-    console.log($(this).text())
+    period = $(this).attr("href").substr(1)
+    chart.data.datasets[0].data = [];
+    chart.data.datasets[1].data = [];
+    chart.update()
+    loadInParallel(0, period);
   })
-  var i = 0;
-  loadInParallel(0);
+
+  $("#irrigation-button").click(function () {
+    $.post("/gardener/irrigate").done(function (response) {
+      console.log(response);
+    })
+  })
+
+  loadInParallel(0, period);
 })

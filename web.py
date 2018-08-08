@@ -31,7 +31,10 @@ def query(page, period):
         subquery_size = 5000
         bucket_size = 1
         query_value  = datetime.now() - timedelta(hours=1)
-
+    elif period == "last-6-hours":
+        subquery_size = 5000
+        bucket_size = 10
+        query_value  = datetime.now() - timedelta(hours=6)
 
     avg_value = func.avg(SensorData.value).label("value")
     avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")

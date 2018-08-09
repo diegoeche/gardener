@@ -113,11 +113,9 @@ function loadInParallel(i, period) {
       loadInParallel(i+4, period)
     }
     addDataToChart(chart, a1[0])
-    chart.update()
     addDataToChart(chart, a2[0])
     chart.update()
     addDataToChart(chart, a3[0])
-    chart.update()
     addDataToChart(chart, a4[0])
     chart.update()
   })

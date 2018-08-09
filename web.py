@@ -19,8 +19,8 @@ from gardener import move_from_to, hose, pumpWater
 def query(page, period):
     page = int(page)
 
-    subquery_size = 25000
-    bucket_size = 60 * 5
+    subquery_size = 50000
+    bucket_size = 60 * 10
     query_value  = datetime.now() - timedelta(days=1)
 
     if period == "today":

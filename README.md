@@ -44,7 +44,6 @@ TBD
 - [] Less points (compress old timeline)
 
 ### Missing Features
-- [] Add Water Button
 - [] Alert/Schedule
 - [] Multiple Plant Support
 - [] Other Sensors

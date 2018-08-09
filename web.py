@@ -97,6 +97,10 @@ def irrigate():
     finally:
         gardener_lock.release()
 
+@app.route('/schedule')
+def schedule():
+    return render_template('schedule.html')
+
 @app.route('/gardener')
 def gardener():
     return render_template('gardener.html')

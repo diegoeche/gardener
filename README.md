@@ -1,6 +1,8 @@
 # [WIP] Open-Gardener
 
-An end-to-end free-range/bio/free-trade/gardening solution from scratch.
+A Modular End-to-End free-range/bio/free-trade... Gardening solution from scratch.
+
+<img width=100% src=/images/dashboard.png ></img>
 
 ## List of Parts:
 
@@ -15,9 +17,10 @@ An end-to-end free-range/bio/free-trade/gardening solution from scratch.
 
 ## Custom Parts:
 
-* Water Multiplexer: 3D printed.
+* Water Multiplexer: 3D Printed.
 
-TBD: Add picture
+<img width=100% src=/images/water-multiplexer.png ></img>
+
 
 ## Software
 
@@ -29,6 +32,18 @@ TBD: Add picture
 
 TBD
 
+## DEMOs
+
+### Water-Multiplexer in Action:
+
+[![Alt text](https://instagram.fmuc3-1.fna.fbcdn.net/vp/47f53c0f1ed12be0315f7cd660795a7d/5B65A3D3/t51.2885-15/e35/28157080_224062311499733_272915506321686528_n.jpg)](https://www.instagram.com/p/Bf59qRFH2Rw/)
+
 ## TODOs
 
-TBD
+### Performance
+- [] Less points (compress old timeline)
+
+### Missing Features
+- [] Alert/Schedule
+- [] Multiple Plant Support
+- [] Other Sensors

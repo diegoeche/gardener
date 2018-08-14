@@ -15,24 +15,24 @@ import json
 from app import *
 from gardener import move_from_to, hose, pumpWater
 
-@cache.memoize(timeout=60 * 5)
+# @cache.memoize(timeout=60 * 5)
 def query(page, period):
     page = int(page)
 
-    subquery_size = 50000
+    subquery_size = 10000
     bucket_size = 60 * 10
     query_value  = datetime.now() - timedelta(days=1)
 
     if period == "today":
-        subquery_size = 5000
+        subquery_size = 1000
         bucket_size = 60
         query_value  = datetime.now() - timedelta(days=1)
     elif period == "last-hour":
-        subquery_size = 5000
+        subquery_size = 1000
         bucket_size = 1
         query_value  = datetime.now() - timedelta(hours=1)
     elif period == "last-6-hours":
-        subquery_size = 5000
+        subquery_size = 1000
         bucket_size = 10
         query_value  = datetime.now() - timedelta(hours=6)
 
@@ -51,7 +51,7 @@ def query(page, period):
 
     data = [
         {
-            "value": (1024 - value) / 1024,
+            "value": (1023 - value) / 1024,
             "time": time
         } for (value, time) in query.all()
     ]

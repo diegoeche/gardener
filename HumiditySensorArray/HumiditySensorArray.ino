@@ -1,15 +1,32 @@
-int analogPin = 6;     // potentiometer wiper (middle terminal) connected to analog pin 3
-                       // outside leads to ground and +5V
-int val = 0;           // variable to store the value read
+const int SENSOR_SIZE = 4;
+const int SAMPLES = 100;
+int values[SENSOR_SIZE][SAMPLES];
 
-void setup()
-{
-  Serial.begin(9600);              //  setup serial
+void setup() {
+  Serial.begin(9600);
 }
 
 void loop() {
-  val = analogRead(analogPin);     // read the input pin
-  Serial.println(val);             // debug value
-  delay(100);
-}
+  for(int i = 0; i < SENSOR_SIZE; i++) {
+    for(int j = 0; j < SAMPLES; j++) {
+      values[i][j] = analogRead(i);
+    }
+  }
+  
+  for(int i = 0; i < SENSOR_SIZE; i++) {
+    long accum = 0;
+    
+    for(int j = 0; j < SAMPLES; j++) {
+      accum += values[i][j];
+    }
 
+    Serial.print(accum/SAMPLES);
+    
+    if(i != (SENSOR_SIZE -1)) {
+      Serial.print(",");  
+    } else {
+      Serial.print("\n");
+    }
+  }
+  delay(500);
+}

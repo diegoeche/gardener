@@ -39,14 +39,15 @@ def query(page, period):
     avg_value = func.avg(SensorData.value).label("value")
     avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
     group = func.strftime('%s', SensorData.measured_at) / bucket_size
-    subquery = db.session.query(SensorData.id).filter(SensorData.sensor_id == 1).order_by("measured_at")
+
+    subquery = db.session.query(SensorData.id).order_by("measured_at")
 
     if period != "historical":
         subquery = subquery.filter(SensorData.measured_at >= query_value)
 
     paginated_subquery = subquery.offset(page * subquery_size).limit(subquery_size)
 
-    query = db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)).group_by(group)
+    query = db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)).filter(SensorData.sensor_id == 1).group_by(group)
 
     data = [
         {

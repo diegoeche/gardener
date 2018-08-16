@@ -3,8 +3,8 @@
 {% block headers %}
 <script>
   window.sensor = {
-  "name": "{{sensors[0]}}",
-  "data": {{sensor_data|json}}
+    "name": "Humidity",
+    "id": {{sensor.id}}
   }
 </script>
 <script src="/static/init.js"></script>
@@ -15,24 +15,19 @@
   <nav class="col-md-2 d-none d-md-block bg-light sidebar">
     <div class="sidebar-sticky">
       <ul class="nav flex-column">
+	{% for sensor in sensors %}
         <li class="nav-item">
-          <a class="nav-link active" href="#">
-            <span data-feather="activity"></span>
-            Basil #1 <span class="sr-only">(current)</span>
+          <a class="nav-link active" href="/plant/{{sensor.id}}">
+            <span data-feather="activity"></span> {{sensor.name}}
           </a>
         </li>
-	<li class="nav-item">
-          <a class="nav-link" href="#">
-            <span data-feather="activity"></span>
-            Basil #2
-          </a>
-        </li>
+        {% endfor %}
       </ul>
     </div>
   </nav>
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="h2">Basil #1</h1>
+      <h1 class="h2">{{sensor.name}}</h1>
       <div class="btn-group">
 	<button id="irrigation-button" class="btn btn-info" type="button">
 	  Irrigate

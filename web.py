@@ -16,50 +16,19 @@ from app import *
 from gardener import move_from_to, hose, pumpWater
 
 # @cache.memoize(timeout=60 * 5)
-def query(page, period):
+def query(sensor_id, page, period):
     page = int(page)
-
-    subquery_size = 10000
-    bucket_size = 60 * 10
-    query_value  = datetime.now() - timedelta(days=1)
-
-    if period == "today":
-        subquery_size = 1000
-        bucket_size = 60
-        query_value  = datetime.now() - timedelta(days=1)
-    elif period == "last-hour":
-        subquery_size = 1000
-        bucket_size = 1
-        query_value  = datetime.now() - timedelta(hours=1)
-    elif period == "last-6-hours":
-        subquery_size = 1000
-        bucket_size = 10
-        query_value  = datetime.now() - timedelta(hours=6)
-
-    avg_value = func.avg(SensorData.value).label("value")
-    avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
-    group = func.strftime('%s', SensorData.measured_at) / bucket_size
-
-    subquery = db.session.query(SensorData.id).order_by("measured_at")
-
-    if period != "historical":
-        subquery = subquery.filter(SensorData.measured_at >= query_value)
-
-    paginated_subquery = subquery.offset(page * subquery_size).limit(subquery_size)
-
-    query = db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)).filter(SensorData.sensor_id == 1).group_by(group)
-
     data = [
         {
-            "value": (1023 - value) / 1024,
+            "value": (1023 - value) / 1023,
             "time": time
-        } for (value, time) in query.all()
+        } for (value, time) in SensorData.paginated_query(sensor_id, page, period).all()
     ]
 
     return jsonify(data)
 
-@app.route('/api', methods=['GET'])
-def api():
+@app.route('/api/sensor/<sensor_id>', methods=['GET'])
+def api(sensor_id):
     page = request.args.get('page')
     period = request.args.get('period')
 
@@ -68,7 +37,7 @@ def api():
     if period is None:
         period = "historical"
 
-    return query(page, period)
+    return query(sensor_id, page, period)
 
 @app.route('/gardener/test_move', methods=['POST'])
 def test_move():
@@ -106,19 +75,30 @@ def schedule():
 def gardener():
     return render_template('gardener.html')
 
-@app.route('/')
-def dashboard():
+@app.route('/plant/<plant_id>')
+def plant(plant_id):
+    sensor = Sensor.query.filter(Sensor.id == plant_id).one()
+    sensors = Sensor.query.all()
     return render_template(
         'dashboard.html',
-        sensors=["Humidity"],
-        sensor_data=[]
+        sensor=sensor,
+        sensors=sensors,
+        plant_id=plant_id
+    )
+
+@app.route('/')
+def home():
+    sensors = Sensor.query.all()
+    return render_template(
+        'home.html',
+        sensors=sensors
     )
 
 if __name__ == '__main__':
-    admin = Admin(app)
-    admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(Sensor, db.session))
-    admin.add_view(ModelView(SensorData, db.session))
+    # admin = Admin(app)
+    # admin.add_view(ModelView(User, db.session))
+    # admin.add_view(ModelView(Sensor, db.session))
+    # admin.add_view(ModelView(SensorData, db.session))
 
     db.create_all()
     app.run('0.0.0.0', 8000, debug=True)

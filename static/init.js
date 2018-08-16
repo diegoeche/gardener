@@ -94,7 +94,7 @@ function addDataToChart(chart, data) {
 
 
 function loadData(page, chart, period) {
-  var url = "/api?page=" + page + "&period=" + period
+  var url = "/api/sensor/" + window.sensor.id + "?page=" + page + "&period=" + period
   console.log(url)
   return $.get(url)
 }

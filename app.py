@@ -4,6 +4,11 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_caching import Cache
 from datetime import datetime
+
+import datetime
+from datetime import datetime, date, timedelta
+from sqlalchemy.sql.expression import func, select
+
 import json
 
 app = Flask(__name__)
@@ -45,3 +50,35 @@ class SensorData(db.Model):
         nullable=False,
         default=datetime.utcnow
     )
+
+    @staticmethod
+    def paginated_query(sensor_id, page, period):
+        subquery_size = 25000
+        bucket_size = 60 * 10
+        query_value  = datetime.now() - timedelta(days=1)
+
+        if period == "today":
+            subquery_size = 20000
+            bucket_size = 60
+            query_value  = datetime.now() - timedelta(days=1)
+        elif period == "last-hour":
+            subquery_size = 1000
+            bucket_size = 1
+            query_value  = datetime.now() - timedelta(hours=1)
+        elif period == "last-6-hours":
+            subquery_size = 5000
+            bucket_size = 10
+            query_value  = datetime.now() - timedelta(hours=6)
+
+        avg_value = func.avg(SensorData.value).label("value")
+        avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
+        group = func.strftime('%s', SensorData.measured_at) / bucket_size
+
+        subquery = db.session.query(SensorData.id).order_by("measured_at")
+
+        if period != "historical":
+            subquery = subquery.filter(SensorData.measured_at >= query_value)
+
+        paginated_subquery = subquery.offset(page * subquery_size).limit(subquery_size)
+
+        return db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)).filter(SensorData.sensor_id == sensor_id).group_by(group)

@@ -40,6 +40,10 @@ class Sensor(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('users', lazy=True))
 
+
+def ago(delta):
+    return datetime.now() - delta
+
 class SensorData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.Float)
@@ -52,27 +56,47 @@ class SensorData(db.Model):
     )
 
     @staticmethod
+    def average_value():
+        return func.avg(SensorData.value).label("value")
+
+    @staticmethod
+    def by_id(query, sensor_id):
+        return query.filter(SensorData.sensor_id == sensor_id)
+
+    @staticmethod
+    def current_value(sensor_id):
+        # Last 10 measurements
+        ids = db.session.query(SensorData.id).order_by("measured_at DESC").limit(60 * 10)
+        avg = SensorData.average_value()
+        return SensorData.by_id(db.session.query(avg).filter(SensorData.id.in_(ids)), sensor_id).scalar()
+
+    @staticmethod
+    def measured_timestamp():
+        return func.strftime("%s", SensorData.measured_at)
+
+    @staticmethod
     def paginated_query(sensor_id, page, period):
-        subquery_size = 25000
+        subquery_size = 100000
         bucket_size = 60 * 10
-        query_value  = datetime.now() - timedelta(days=1)
+
+        query_value  = ago(timedelta(days=1))
 
         if period == "today":
             subquery_size = 20000
             bucket_size = 60
-            query_value  = datetime.now() - timedelta(days=1)
+            query_value  = ago(timedelta(days=1))
         elif period == "last-hour":
             subquery_size = 1000
             bucket_size = 1
-            query_value  = datetime.now() - timedelta(hours=1)
+            query_value  = ago(timedelta(hours=1))
         elif period == "last-6-hours":
             subquery_size = 5000
             bucket_size = 10
-            query_value  = datetime.now() - timedelta(hours=6)
+            query_value  = ago(timedelta(hours=6))
 
-        avg_value = func.avg(SensorData.value).label("value")
-        avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
-        group = func.strftime('%s', SensorData.measured_at) / bucket_size
+        avg_value = SensorData.average_value()
+        timestamp = SensorData.measured_timestamp()
+        avg_time = func.avg(timestamp).label("measured_at")
 
         subquery = db.session.query(SensorData.id).order_by("measured_at")
 
@@ -81,4 +105,6 @@ class SensorData(db.Model):
 
         paginated_subquery = subquery.offset(page * subquery_size).limit(subquery_size)
 
-        return db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)).filter(SensorData.sensor_id == sensor_id).group_by(group)
+        filtered_by_id = SensorData.by_id(db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)), sensor_id)
+
+        return filtered_by_id.group_by(timestamp / bucket_size)

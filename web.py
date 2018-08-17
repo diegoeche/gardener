@@ -15,20 +15,23 @@ import json
 from app import *
 from gardener import move_from_to, hose, pumpWater
 
+def normalize(value):
+    return (1023 - value) / 1023
+
 # @cache.memoize(timeout=60 * 5)
 def query(sensor_id, page, period):
     page = int(page)
     data = [
         {
-            "value": (1023 - value) / 1023,
+            "value": normalize(value),
             "time": time
         } for (value, time) in SensorData.paginated_query(sensor_id, page, period).all()
     ]
-
     return jsonify(data)
 
+
 @app.route('/api/sensor/<sensor_id>', methods=['GET'])
-def api(sensor_id):
+def sensor(sensor_id):
     page = request.args.get('page')
     period = request.args.get('period')
 
@@ -38,6 +41,27 @@ def api(sensor_id):
         period = "historical"
 
     return query(sensor_id, page, period)
+
+
+@app.route('/api/sensors', methods=['GET'])
+def sensors():
+    sensors = Sensor.query.all()
+
+    data = [
+        {
+            "name": sensor.name,
+            "value": normalize(SensorData.current_value(sensor.id))
+        } for sensor in sensors
+    ]
+    return jsonify(data)
+
+@app.route('/')
+def home():
+    sensors = Sensor.query.all()
+    return render_template(
+        'home.html',
+        sensors=sensors
+    )
 
 @app.route('/gardener/test_move', methods=['POST'])
 def test_move():
@@ -67,13 +91,16 @@ def irrigate():
     finally:
         gardener_lock.release()
 
+
 @app.route('/schedule')
 def schedule():
     return render_template('schedule.html')
 
+
 @app.route('/gardener')
 def gardener():
     return render_template('gardener.html')
+
 
 @app.route('/plant/<plant_id>')
 def plant(plant_id):
@@ -86,13 +113,6 @@ def plant(plant_id):
         plant_id=plant_id
     )
 
-@app.route('/')
-def home():
-    sensors = Sensor.query.all()
-    return render_template(
-        'home.html',
-        sensors=sensors
-    )
 
 if __name__ == '__main__':
     # admin = Admin(app)

@@ -1,6 +1,6 @@
 Flask
-Flask-Admin
 Flask-SQLAlchemy
 pyserial
 Flask-Caching
 filelock
+python-crontab

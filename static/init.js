@@ -95,7 +95,6 @@ function addDataToChart(chart, data) {
 
 function loadData(page, chart, period) {
   var url = "/api/sensor/" + window.sensor.id + "?page=" + page + "&period=" + period
-  console.log(url)
   return $.get(url)
 }
 
@@ -107,7 +106,8 @@ function loadInParallel(i, period) {
     loadData(i + 2, chart, period),
     loadData(i + 3, chart, period)
   ).done(function (a1,a2,a3,a4) {
-    console.log((new Date()).getTime() - before.getTime())
+    // Benchmark:
+    // console.log((new Date()).getTime() - before.getTime())
 
     if(a3[0].length > 0) {
       loadInParallel(i+4, period)
@@ -135,8 +135,11 @@ $(function () {
   })
 
   $("#irrigation-button").click(function () {
-    $.post("/gardener/irrigate").done(function (response) {
-      console.log(response);
+    var button = $(this);
+    var oldHtml = button.html();
+    button.html("Waiting...");
+    $.post("/gardener/irrigate/" + window.sensor.id).done(function (response) {
+      button.html(oldHtml);
     })
   })
 

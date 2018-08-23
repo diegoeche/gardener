@@ -1,3 +1,74 @@
 {% extends "layout.html" %}
+
+{% block headers %}
+<script src="/static/schedule.js"></script>
+{% endblock %}
+
 {% block content %}
+<ul class="list-group mb-3 bg-dark">
+  <li class="list-group-item d-flex bg-dark text-light">
+    <div class="col-sm-2">
+      <h4>Action</h4>
+    </div>
+    <div class="col-sm-3">
+      <h4>Command</h4>
+    </div>
+    <div class="col-sm-2">
+      <h4>Slices</h4>
+    </div>
+    <div class="col-sm-2">
+      <h4>Previous</h4>
+    </div>
+    <div class="col-sm-3">
+      <h4>Next</h4>
+    </div>
+  </li>
+  {% for job in jobs %}
+  <li class="list-group-item d-flex">
+    <div class="col-sm-2">
+      <h6 class="my-0">{{job.comment.split(",")[1]}}</h6>
+    </div>
+    <div class="col-sm-3">
+      <span class="text-muted">{{job.command}}</span>
+    </div>
+    <div class="col-sm-2">
+      <span class="text-muted">{{job.slices}}</small>
+    </div>
+    <div class="col-sm-2">
+      <span class="text-muted">{{job.schedule().get_prev()}} UTC</span>
+    </div>
+    <div class="col-sm-2">
+      <span class="text-muted">{{job.schedule().get_next()}} UTC</span>
+    </div>
+
+    <div class="btn-group d-flex">
+      <!-- <button><span data-feather="edit"></span></button> -->
+      <button class="delete_job" data-index="{{loop.index0}}"><span data-feather="trash-2"></span></button>
+    </div>
+  </li>
+{% endfor%}
+<li class="list-group-item">
+  <form class="form-inline d-flex mb-3">
+    <div class="form-group col-sm-2">
+      <input type="text" class="form-control" id="actionName" placeholder="Action Name">
+    </div>
+
+    <div class="form-group col-sm-3">
+      <select class="form-control" id="actionType" style="width:100%">
+	<option value="1">Irrigate 1</option>
+	<option value="2">Irrigate 2</option>
+	<option value="3">Irrigate 3</option>
+      </select>
+    </div>
+
+    <div class="col-sm-6">
+      <input class="form-control"
+	     id="frequency"
+	     placeholder="* * * * *", value="* * * * *">
+    </div>
+    <button id="create_job" class="btn btn-primary">Create</button>
+  </form>
+</li>
+</ul>
+
 {% endblock %}

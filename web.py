@@ -13,7 +13,8 @@ from datetime import datetime, date, timedelta
 import json
 
 from app import *
-from gardener import move_from_to, hose, pumpWater
+from gardener import test_positions, irrigate
+from gardener_tab import GardenerTab
 
 def normalize(value):
     return (1023 - value) / 1023
@@ -46,7 +47,6 @@ def sensor(sensor_id):
 @app.route('/api/sensors', methods=['GET'])
 def sensors():
     sensors = Sensor.query.all()
-
     data = [
         {
             "name": sensor.name,
@@ -54,6 +54,26 @@ def sensors():
         } for sensor in sensors
     ]
     return jsonify(data)
+
+
+@app.route('/api/jobs', methods=['GET'])
+def jobs():
+    data = GardenerTab.all()
+    return jsonify(data)
+
+
+@app.route('/api/jobs', methods=['POST'])
+def create_job():
+    input_json = request.json
+    GardenerTab.create(input_json)
+    return jsonify(input_json)
+
+
+@app.route('/api/jobs/delete/<id>', methods=['POST'])
+def delete_job(id):
+    GardenerTab.remove_by_id(int(id))
+    return jsonify({"status": "ok"})
+
 
 @app.route('/')
 def home():
@@ -63,38 +83,30 @@ def home():
         sensors=sensors
     )
 
+# TODO: DRY
 @app.route('/gardener/test_move', methods=['POST'])
 def test_move():
-    lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
-    gardener_lock = FileLock(lock_path, timeout=100)
-    try:
-        gardener_lock.acquire(timeout=0.1)
-        move_from_to(0,5)
-        return jsonify({ "status": "ok" })
-    except Timeout:
-        return jsonify({ "status": "locked" })
-    finally:
-        gardener_lock.release()
+    message = "ok" if test_positions() else "locked"
+    return jsonify({ "status": message })
 
+# TODO: make me data-driven
+SENSOR_TO_HOSE = {
+    "1": 1,
+    "2": 2
+}
 
-@app.route('/gardener/irrigate', methods=['POST'])
-def irrigate():
-    lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
-    gardener_lock = FileLock(lock_path, timeout=100)
-    try:
-        gardener_lock.acquire(timeout=0.1)
-        hose(1)
-        pumpWater(10)
-        return jsonify({ "status": "ok" })
-    except Timeout:
-        return jsonify({ "status": "locked" })
-    finally:
-        gardener_lock.release()
-
+@app.route('/gardener/irrigate/<id>', methods=['POST'])
+def irrigate_plant(id):
+    message = "ok" if irrigate(SENSOR_TO_HOSE[id]) else "locked"
+    return jsonify({ "status": message })
 
 @app.route('/schedule')
 def schedule():
-    return render_template('schedule.html')
+    jobs = GardenerTab.all()
+    return render_template(
+        'schedule.html',
+        jobs=jobs
+    )
 
 
 @app.route('/gardener')
@@ -115,10 +127,5 @@ def plant(plant_id):
 
 
 if __name__ == '__main__':
-    # admin = Admin(app)
-    # admin.add_view(ModelView(User, db.session))
-    # admin.add_view(ModelView(Sensor, db.session))
-    # admin.add_view(ModelView(SensorData, db.session))
-
     db.create_all()
     app.run('0.0.0.0', 8000, debug=True)

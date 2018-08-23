@@ -5,4 +5,4 @@ VALUES ("Petersil");
 INSERT INTO sensor (name)
 VALUES ("NOT USED");
 INSERT INTO sensor (name)
-VALUES ("NOT USED");
+VALUES ("NOT USED 2");

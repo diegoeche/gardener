@@ -1,5 +1,6 @@
 from Raspi_PWM_Servo_Driver import PWM
 from Raspi_MotorHAT import Raspi_MotorHAT, Raspi_DCMotor
+from filelock import Timeout, FileLock
 
 import time
 import atexit
@@ -35,12 +36,11 @@ def hose(n):
         pwm.setPWM(0, 0, new_position)
         time.sleep(1.0)
 
-def pumpWater(n):
+def pump_water(n):
         myMotor.run(Raspi_MotorHAT.BACKWARD);
         time.sleep(n)
         myMotor.run(Raspi_MotorHAT.RELEASE);
         time.sleep(0.5)
-
 
 def move_from_to(start, end):
         for i in range(start, end):
@@ -48,19 +48,29 @@ def move_from_to(start, end):
         for i in range(end, start, -1):
                 hose(i)
 
+def test_positions():
+    lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
+    gardener_lock = FileLock(lock_path, timeout=100)
+    try:
+        gardener_lock.acquire(timeout=0.1)
+        move_from_to(0,5)
+        return True
+    except Timeout:
+        return False
+    finally:
+        gardener_lock.release()
 
 
-# while(True):
-#   move_from_to(0,5)
-
-# count = 0
-# while(True):
-#         count = count + 1
-#         print(count, " iteration")
-#         hose(1)
-#         pumpWater(3)
-#         hose(2)
-#         pumpWater(2)
-#         for i in range(0, 5):
-#                 print(i, " minutes")
-#                 time.sleep(60)
+def irrigate(n):
+    lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
+    gardener_lock = FileLock(lock_path, timeout=100)
+    try:
+        gardener_lock.acquire(timeout=0.1)
+        hose(n)
+        time.sleep(3)
+        # pumpWater(10)
+        return True
+    except Timeout:
+        return False
+    finally:
+        gardener_lock.release()

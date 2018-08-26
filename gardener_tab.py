@@ -3,9 +3,9 @@ from crontab import CronTab
 gardener_tab = CronTab(user='pi')
 
 COMMANDS = {
-    "1": "echo 'Hello World! 1'",
-    "2": "echo 'Hello World! 2'",
-    "3": "echo 'Hello World! 3'",
+    "0": "python /home/pi/gardener/irrigate.py 0",
+    "1": "python /home/pi/gardener/irrigate.py 1",
+    "2": "python /home/pi/gardener/irrigate.py 2"
 }
 
 class GardenerTab:

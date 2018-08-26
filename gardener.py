@@ -67,8 +67,7 @@ def irrigate(n):
     try:
         gardener_lock.acquire(timeout=0.1)
         hose(n)
-        time.sleep(3)
-        # pumpWater(10)
+        pump_water(10)
         return True
     except Timeout:
         return False

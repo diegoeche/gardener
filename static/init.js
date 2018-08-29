@@ -1,6 +1,6 @@
 function processData(data) {
   return data.map(function (x) {
-    return { y:x.value, x: new Date(x.time * 1000)};
+    return { y:x.value, x: new Date(x.time)};
   })
 }
 
@@ -101,22 +101,18 @@ function loadData(page, chart, period) {
 function loadInParallel(i, period) {
   var before = new Date()
   $.when(
-    loadData(i,     chart, period),
-    loadData(i + 1, chart, period),
-    loadData(i + 2, chart, period),
-    loadData(i + 3, chart, period)
-  ).done(function (a1,a2,a3,a4) {
+    loadData(i, chart, period),
+    loadData(i + 1, chart, period)
+  ).done(function (a1,a2) {
     // Benchmark:
     // console.log((new Date()).getTime() - before.getTime())
 
-    if(a3[0].length > 0) {
-      loadInParallel(i+4, period)
+    if(a2[0].length > 0) {
+      loadInParallel(i+2, period)
     }
     addDataToChart(chart, a1[0])
-    addDataToChart(chart, a2[0])
     chart.update()
-    addDataToChart(chart, a3[0])
-    addDataToChart(chart, a4[0])
+    addDataToChart(chart, a2[0])
     chart.update()
   })
 }

@@ -16,19 +16,35 @@ from app import *
 from gardener import test_positions, irrigate
 from gardener_tab import GardenerTab
 
+from influxdb import InfluxDBClient
+client = InfluxDBClient('localhost', 8086, 'root', 'root', 'gardener_db')
+
 def normalize(value):
-    return (1023 - value) / 1023
+    return (1023.0 - value) / 1023
 
 # @cache.memoize(timeout=60 * 5)
 def query(sensor_id, page, period):
     page = int(page)
-    data = [
-        {
-            "value": normalize(value),
-            "time": time
-        } for (value, time) in SensorData.paginated_query(sensor_id, page, period).all()
-    ]
-    return jsonify(data)
+    # query = SensorData.paginated_query(sensor_id, page, period).all()
+    # SQL Injection
+    page_size = 1000;
+    query = client.query(
+        'SELECT ((1023.0) - value)/1023 FROM SENSOR_%s LIMIT %s OFFSET %s;' %
+        (sensor_id, page_size, page * page_size)
+    )
+
+    dictionary = query.raw
+
+    if 'series' in dictionary:
+        data = [
+            {
+                "value": value,
+                "time": time
+            } for (time, value) in query.raw['series'][0]['values']
+        ]
+        return jsonify(data)
+    else:
+        return jsonify([])
 
 
 @app.route('/api/sensor/<sensor_id>', methods=['GET'])

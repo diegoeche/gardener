@@ -53,7 +53,8 @@ def test_positions():
     gardener_lock = FileLock(lock_path, timeout=100)
     try:
         gardener_lock.acquire(timeout=0.1)
-        move_from_to(0,5)
+        move_from_to(0,3)
+        move_from_to(0,3)
         return True
     except Timeout:
         return False

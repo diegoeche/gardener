@@ -25,12 +25,25 @@ def normalize(value):
 # @cache.memoize(timeout=60 * 5)
 def query(sensor_id, page, period):
     page = int(page)
-    # query = SensorData.paginated_query(sensor_id, page, period).all()
+    if period == None:
+        period = "historical"
+
+    bucket = {
+        "historical": "30m",
+        "today": "5m",
+        "last-6-hours": "1m",
+        "last-hour": "10s",
+    }[period]
+
+
     # SQL Injection
-    page_size = 1000;
+    page_size = 100;
     query = client.query(
-        'SELECT ((1023.0) - value)/1023 FROM SENSOR_%s LIMIT %s OFFSET %s;' %
-        (sensor_id, page_size, page * page_size)
+        """SELECT (1023 - mean(value)) / 1023
+           FROM SENSOR_%s
+           WHERE time < now()
+           GROUP BY time(%s) LIMIT %s OFFSET %s;
+        """ % (sensor_id, bucket, page_size, page * page_size)
     )
 
     dictionary = query.raw
@@ -116,6 +129,7 @@ def irrigate_plant(id):
     message = "ok" if irrigate(SENSOR_TO_HOSE[id]) else "locked"
     return jsonify({ "status": message })
 
+
 @app.route('/schedule')
 def schedule():
     jobs = GardenerTab.all()
@@ -123,7 +137,6 @@ def schedule():
         'schedule.html',
         jobs=jobs
     )
-
 
 @app.route('/gardener')
 def gardener():

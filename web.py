@@ -29,7 +29,7 @@ def query(sensor_id, page, period):
         "historical": "15m",
         "today": "5m",
         "last-6-hours": "1m",
-        "last-hour": "10s",
+        "last-hour": "1s",
     }[period]
 
     where_clause = {

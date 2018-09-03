@@ -29,7 +29,7 @@ def query(sensor_id, page, period):
         period = "historical"
 
     bucket = {
-        "historical": "30m",
+        "historical": "15m",
         "today": "5m",
         "last-6-hours": "1m",
         "last-hour": "10s",
@@ -120,8 +120,10 @@ def test_move():
 
 # TODO: make me data-driven
 SENSOR_TO_HOSE = {
-    "1": 1,
-    "2": 2
+    "1": 5,
+    "2": 4,
+    "3": 3,
+    "4": 2
 }
 
 @app.route('/gardener/irrigate/<id>', methods=['POST'])

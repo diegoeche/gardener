@@ -16,20 +16,61 @@ from app import *
 from gardener import test_positions, irrigate
 from gardener_tab import GardenerTab
 
-def normalize(value):
-    return (1023 - value) / 1023
+from influxdb import InfluxDBClient
+client = InfluxDBClient('localhost', 8086, 'root', 'root', 'gardener_db')
 
 # @cache.memoize(timeout=60 * 5)
 def query(sensor_id, page, period):
     page = int(page)
-    data = [
-        {
-            "value": normalize(value),
-            "time": time
-        } for (value, time) in SensorData.paginated_query(sensor_id, page, period).all()
-    ]
-    return jsonify(data)
+    if period == None:
+        period = "historical"
 
+    bucket = {
+        "historical": "15m",
+        "today": "5m",
+        "last-6-hours": "1m",
+        "last-hour": "1s",
+    }[period]
+
+    where_clause = {
+        "historical":   "time < now()",
+        "today":        "time < now() AND time > (now() - 1d)",
+        "last-6-hours": "time < now() AND time > (now() - 6h)",
+        "last-hour":    "time < now() AND time > (now() - 1h)",
+    }[period]
+
+    # SQL Injection: YOLO
+    page_size = 100;
+    query = client.query(
+        """SELECT (1023 - mean(value)) / 1023
+           FROM SENSOR_%s
+           WHERE %s
+           GROUP BY time(%s) LIMIT %s OFFSET %s;
+        """ % (sensor_id, where_clause, bucket, page_size, page * page_size)
+    )
+
+    dictionary = query.raw
+
+    if 'series' in dictionary:
+        data = [
+            {
+                "value": value,
+                "time": time
+            } for (time, value) in query.raw['series'][0]['values']
+        ]
+        return jsonify(data)
+    else:
+        return jsonify([])
+
+
+def current_value(sensor_id):
+    query = client.query(
+        """SELECT (1023 - mean(value)) / 1023
+           FROM SENSOR_%s
+           WHERE time > now() - 10m
+        """ % (sensor_id)
+    )
+    return query.raw['series'][0]["values"][0][1]
 
 @app.route('/api/sensor/<sensor_id>', methods=['GET'])
 def sensor(sensor_id):
@@ -50,7 +91,7 @@ def sensors():
     data = [
         {
             "name": sensor.name,
-            "value": normalize(SensorData.current_value(sensor.id))
+            "value": current_value(sensor.id)
         } for sensor in sensors
     ]
     return jsonify(data)
@@ -91,14 +132,17 @@ def test_move():
 
 # TODO: make me data-driven
 SENSOR_TO_HOSE = {
-    "1": 1,
-    "2": 2
+    "1": 5,
+    "2": 2,
+    "3": 3,
+    "4": 4
 }
 
 @app.route('/gardener/irrigate/<id>', methods=['POST'])
 def irrigate_plant(id):
     message = "ok" if irrigate(SENSOR_TO_HOSE[id]) else "locked"
     return jsonify({ "status": message })
+
 
 @app.route('/schedule')
 def schedule():
@@ -107,7 +151,6 @@ def schedule():
         'schedule.html',
         jobs=jobs
     )
-
 
 @app.route('/gardener')
 def gardener():

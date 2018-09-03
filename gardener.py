@@ -31,8 +31,8 @@ myMotor = mh.getMotor(2)
 myMotor.setSpeed(220)
 
 def hose(n):
-        angles  = [85,85,81,76,75,75]
-        new_position = (servoMax - offset) - (n * angles[n])
+        angles  = [0,80,150, 85 * 3, 87 * 4, 88 * 5]
+        new_position = (servoMax - offset) - (angles[n])
         pwm.setPWM(0, 0, new_position)
         time.sleep(1.0)
 
@@ -53,7 +53,7 @@ def test_positions():
     gardener_lock = FileLock(lock_path, timeout=100)
     try:
         gardener_lock.acquire(timeout=0.1)
-        move_from_to(0,5)
+        move_from_to(2,5)
         return True
     except Timeout:
         return False
@@ -67,7 +67,7 @@ def irrigate(n):
     try:
         gardener_lock.acquire(timeout=0.1)
         hose(n)
-        pump_water(10)
+        pump_water(7)
         return True
     except Timeout:
         return False

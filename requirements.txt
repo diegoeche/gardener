@@ -5,3 +5,4 @@ Flask-Caching
 filelock
 python-crontab
 croniter
+influxdb

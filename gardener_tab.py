@@ -5,7 +5,10 @@ gardener_tab = CronTab(user='pi')
 COMMANDS = {
     "0": "python /home/pi/gardener/irrigate.py 0",
     "1": "python /home/pi/gardener/irrigate.py 1",
-    "2": "python /home/pi/gardener/irrigate.py 2"
+    "2": "python /home/pi/gardener/irrigate.py 2",
+    "3": "python /home/pi/gardener/irrigate.py 3",
+    "4": "python /home/pi/gardener/irrigate.py 4",
+    "5": "python /home/pi/gardener/irrigate.py 5"
 }
 
 class GardenerTab:

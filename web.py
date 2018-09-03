@@ -35,15 +35,21 @@ def query(sensor_id, page, period):
         "last-hour": "10s",
     }[period]
 
+    where_clause = {
+        "historical":   "time < now()",
+        "today":        "time < now() AND time > (now() - 1d)",
+        "last-6-hours": "time < now() AND time > (now() - 6h)",
+        "last-hour":    "time < now() AND time > (now() - 1h)",
+    }[period]
 
-    # SQL Injection
+    # SQL Injection: YOLO
     page_size = 100;
     query = client.query(
         """SELECT (1023 - mean(value)) / 1023
            FROM SENSOR_%s
-           WHERE time < now()
+           WHERE %s
            GROUP BY time(%s) LIMIT %s OFFSET %s;
-        """ % (sensor_id, bucket, page_size, page * page_size)
+        """ % (sensor_id, where_clause, bucket, page_size, page * page_size)
     )
 
     dictionary = query.raw

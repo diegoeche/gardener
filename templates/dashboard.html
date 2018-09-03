@@ -1,124 +1,53 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Gardener Dashboard</title>
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
-    <link rel="apple-touch-icon" href="/static/transparent-plant.png" />
+{% extends "layout.html" %}
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
-    <script src="/static/utils.js"></script>
-    <script src="/static/Chart.bundle.js"></script>
-    <script src="/static/jquery-3.3.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script>
-      window.sensor = {
-        "name": "{{sensors[0]}}",
-        "data": {{sensor_data|json}}
-      }
-    </script>
-    <script src="/static/init.js"></script>
-    <style>
-      canvas{
-      -moz-user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
-      }
-    </style>
-    <link href="/static/dashboard.css" rel="stylesheet">
-  </head>
+{% block headers %}
+<script>
+  window.sensor = {
+    "name": "Humidity",
+    "id": {{sensor.id}}
+  }
+</script>
+<script src="/static/init.js"></script>
+{% endblock %}
 
-  <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-      <a class="navbar-brand" href="#">
-	<img src="/static/transparent-plant.png" width="32" height="32"
-      class="d-inline-block align-center" alt="" style="margin-top: -10px;">
-	Gardener
-      </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
-      	<span class="navbar-toggler-icon"></span>
-      </button>
+{% block content %}
+<div class="row">
+  <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+    <div class="sidebar-sticky">
+      <ul class="nav flex-column">
+	{% for sensor in sensors %}
+        <li class="nav-item">
+          <a class="nav-link active" href="/plant/{{sensor.id}}">
+            <span data-feather="activity"></span> {{sensor.name}}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </nav>
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">{{sensor.name}}</h1>
+      <div class="btn-group">
+	<button id="irrigation-button" class="btn btn-info" type="button">
+	  Irrigate
+	</button>
+	<div class="btn-group dropdown">
+	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span data-feather="calendar"></span>
+	    Select Time
+	  </button>
 
-      <div class="collapse navbar-collapse" id="navbarsExample04">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="#">Plants <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/schedule">Schedule</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/gardener">Test</a>
-          </li>
-          <!-- <li class="nav-item"> -->
-          <!--   <a class="nav-link disabled" href="#">Disabled</a> -->
-          <!-- </li> -->
-          <!-- <li class="nav-item dropdown"> -->
-          <!--   <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a> -->
-          <!--   <div class="dropdown-menu" aria-labelledby="dropdown04"> -->
-          <!--     <a class="dropdown-item" href="#">Action</a> -->
-          <!--     <a class="dropdown-item" href="#">Another action</a> -->
-          <!--     <a class="dropdown-item" href="#">Something else here</a> -->
-          <!--   </div> -->
-          <!-- </li> -->
-        </ul>
-        <!-- <form class="form-inline my-2 my-md-0"> -->
-        <!--   <input class="form-control" type="text" placeholder="Search"> -->
-        <!-- </form> -->
-      </div>
-    </nav>
-    <div class="container-fluid">
-      <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link active" href="#">
-                  <span data-feather="activity"></span>
-                  Basil #1 <span class="sr-only">(current)</span>
-                </a>
-              </li>
-	      <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="activity"></span>
-                  Basil #2
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Basil #1</h1>
-            <div class="btn-group">
-	      <button id="irrigation-button" class="btn btn-info" type="button">
-		Irrigate
-	      </button>
-	      <div class="btn-group dropdown">
-		<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span data-feather="calendar"></span>
-		  Select Time
-		</button>
-
-		<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-		  <a class="dropdown-item" href="#last-hour">Last Hour</a>
-		  <a class="dropdown-item" href="#last-6-hours">Last 6 Hours</a>
-		  <a class="dropdown-item" href="#today">Today</a>
-		  <a class="dropdown-item" href="#historical">All Time</a>
-		</div>
-	      </div>
-            </div>
-          </div>
-	  <canvas id="canvas"></canvas>
-        </main>
+	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+	    <a class="dropdown-item" href="#last-hour">Last Hour</a>
+	    <a class="dropdown-item" href="#last-6-hours">Last 6 Hours</a>
+	    <a class="dropdown-item" href="#today">Today</a>
+	    <a class="dropdown-item" href="#historical">All Time</a>
+	  </div>
+	</div>
       </div>
     </div>
-
-    <!-- Icons -->
-    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-    <script>
-      feather.replace()
-    </script>
-  </body>
-</html>
+    <canvas id="canvas"></canvas>
+  </main>
+</div>
+{% endblock %}

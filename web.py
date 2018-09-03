@@ -13,52 +13,26 @@ from datetime import datetime, date, timedelta
 import json
 
 from app import *
-from gardener import move_from_to, hose, pumpWater
+from gardener import test_positions, irrigate
+from gardener_tab import GardenerTab
 
-@cache.memoize(timeout=60 * 5)
-def query(page, period):
+def normalize(value):
+    return (1023 - value) / 1023
+
+# @cache.memoize(timeout=60 * 5)
+def query(sensor_id, page, period):
     page = int(page)
-
-    subquery_size = 50000
-    bucket_size = 60 * 10
-    query_value  = datetime.now() - timedelta(days=1)
-
-    if period == "today":
-        subquery_size = 5000
-        bucket_size = 60
-        query_value  = datetime.now() - timedelta(days=1)
-    elif period == "last-hour":
-        subquery_size = 5000
-        bucket_size = 1
-        query_value  = datetime.now() - timedelta(hours=1)
-    elif period == "last-6-hours":
-        subquery_size = 5000
-        bucket_size = 10
-        query_value  = datetime.now() - timedelta(hours=6)
-
-    avg_value = func.avg(SensorData.value).label("value")
-    avg_time = func.avg(func.strftime("%s", SensorData.measured_at)).label("measured_at")
-    group = func.strftime('%s', SensorData.measured_at) / bucket_size
-    subquery = db.session.query(SensorData.id).order_by("measured_at")
-
-    if period != "historical":
-        subquery = subquery.filter(SensorData.measured_at >= query_value)
-
-    paginated_subquery = subquery.offset(page * subquery_size).limit(subquery_size)
-
-    query = db.session.query(avg_value, avg_time).filter(SensorData.id.in_(paginated_subquery)).group_by(group)
-
     data = [
         {
-            "value": (1024 - value) / 1024,
+            "value": normalize(value),
             "time": time
-        } for (value, time) in query.all()
+        } for (value, time) in SensorData.paginated_query(sensor_id, page, period).all()
     ]
-
     return jsonify(data)
 
-@app.route('/api', methods=['GET'])
-def api():
+
+@app.route('/api/sensor/<sensor_id>', methods=['GET'])
+def sensor(sensor_id):
     page = request.args.get('page')
     period = request.args.get('period')
 
@@ -67,57 +41,91 @@ def api():
     if period is None:
         period = "historical"
 
-    return query(page, period)
+    return query(sensor_id, page, period)
 
+
+@app.route('/api/sensors', methods=['GET'])
+def sensors():
+    sensors = Sensor.query.all()
+    data = [
+        {
+            "name": sensor.name,
+            "value": normalize(SensorData.current_value(sensor.id))
+        } for sensor in sensors
+    ]
+    return jsonify(data)
+
+
+@app.route('/api/jobs', methods=['GET'])
+def jobs():
+    data = GardenerTab.all()
+    return jsonify(data)
+
+
+@app.route('/api/jobs', methods=['POST'])
+def create_job():
+    input_json = request.json
+    GardenerTab.create(input_json)
+    return jsonify(input_json)
+
+
+@app.route('/api/jobs/delete/<id>', methods=['POST'])
+def delete_job(id):
+    GardenerTab.remove_by_id(int(id))
+    return jsonify({"status": "ok"})
+
+
+@app.route('/')
+def home():
+    sensors = Sensor.query.all()
+    return render_template(
+        'home.html',
+        sensors=sensors
+    )
+
+# TODO: DRY
 @app.route('/gardener/test_move', methods=['POST'])
 def test_move():
-    lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
-    gardener_lock = FileLock(lock_path, timeout=100)
-    try:
-        gardener_lock.acquire(timeout=0.1)
-        move_from_to(0,5)
-        return jsonify({ "status": "ok" })
-    except Timeout:
-        return jsonify({ "status": "locked" })
-    finally:
-        gardener_lock.release()
+    message = "ok" if test_positions() else "locked"
+    return jsonify({ "status": message })
 
+# TODO: make me data-driven
+SENSOR_TO_HOSE = {
+    "1": 1,
+    "2": 2
+}
 
-@app.route('/gardener/irrigate', methods=['POST'])
-def irrigate():
-    lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
-    gardener_lock = FileLock(lock_path, timeout=100)
-    try:
-        gardener_lock.acquire(timeout=0.1)
-        hose(1)
-        pumpWater(10)
-        return jsonify({ "status": "ok" })
-    except Timeout:
-        return jsonify({ "status": "locked" })
-    finally:
-        gardener_lock.release()
+@app.route('/gardener/irrigate/<id>', methods=['POST'])
+def irrigate_plant(id):
+    message = "ok" if irrigate(SENSOR_TO_HOSE[id]) else "locked"
+    return jsonify({ "status": message })
 
 @app.route('/schedule')
 def schedule():
-    return render_template('schedule.html')
+    jobs = GardenerTab.all()
+    return render_template(
+        'schedule.html',
+        jobs=jobs
+    )
+
 
 @app.route('/gardener')
 def gardener():
     return render_template('gardener.html')
 
-@app.route('/')
-def dashboard():
+
+@app.route('/plant/<plant_id>')
+def plant(plant_id):
+    sensor = Sensor.query.filter(Sensor.id == plant_id).one()
+    sensors = Sensor.query.all()
     return render_template(
         'dashboard.html',
-        sensors=["Humidity"],
-        sensor_data=[]
+        sensor=sensor,
+        sensors=sensors,
+        plant_id=plant_id
     )
 
-if __name__ == '__main__':
-    admin = Admin(app)
-    admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(Sensor, db.session))
-    admin.add_view(ModelView(SensorData, db.session))
 
+if __name__ == '__main__':
     db.create_all()
     app.run('0.0.0.0', 8000, debug=True)

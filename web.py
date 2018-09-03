@@ -121,9 +121,9 @@ def test_move():
 # TODO: make me data-driven
 SENSOR_TO_HOSE = {
     "1": 5,
-    "2": 4,
+    "2": 2,
     "3": 3,
-    "4": 2
+    "4": 4
 }
 
 @app.route('/gardener/irrigate/<id>', methods=['POST'])

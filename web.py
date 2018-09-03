@@ -19,9 +19,6 @@ from gardener_tab import GardenerTab
 from influxdb import InfluxDBClient
 client = InfluxDBClient('localhost', 8086, 'root', 'root', 'gardener_db')
 
-def normalize(value):
-    return (1023.0 - value) / 1023
-
 # @cache.memoize(timeout=60 * 5)
 def query(sensor_id, page, period):
     page = int(page)
@@ -66,6 +63,15 @@ def query(sensor_id, page, period):
         return jsonify([])
 
 
+def current_value(sensor_id):
+    query = client.query(
+        """SELECT (1023 - mean(value)) / 1023
+           FROM SENSOR_%s
+           WHERE time > now() - 10m
+        """ % (sensor_id)
+    )
+    return query.raw['series'][0]["values"][0][1]
+
 @app.route('/api/sensor/<sensor_id>', methods=['GET'])
 def sensor(sensor_id):
     page = request.args.get('page')
@@ -85,7 +91,7 @@ def sensors():
     data = [
         {
             "name": sensor.name,
-            "value": normalize(SensorData.current_value(sensor.id))
+            "value": current_value(sensor.id)
         } for sensor in sensors
     ]
     return jsonify(data)

@@ -3,7 +3,7 @@
 A Modular End-to-End vegan/free-range/bio/fair-trade... Gardening solution from
 scratch.
 
-<img width=100% src=/images/dashboard.png ></img>
+<img width=80% src=/images/dashboard.png ></img>
 
 ## List of Parts:
 

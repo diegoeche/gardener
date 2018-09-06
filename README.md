@@ -1,6 +1,7 @@
-# [WIP] Open-Gardener
+# Open-Gardener
 
-A Modular End-to-End free-range/bio/free-trade... Gardening solution from scratch.
+A Modular End-to-End vegan/free-range/bio/fair-trade... Gardening solution from
+scratch.
 
 <img width=100% src=/images/dashboard.png ></img>
 
@@ -19,7 +20,7 @@ A Modular End-to-End free-range/bio/free-trade... Gardening solution from scratc
 
 * Water Multiplexer: 3D Printed.
 
-<img width=100% src=/images/water-multiplexer.png ></img>
+<img width=80% src=/images/water-splitter-v2.png ></img>
 
 
 ## Software
@@ -36,14 +37,11 @@ TBD
 
 ### Water-Multiplexer in Action:
 
-[![Alt text](https://instagram.fmuc3-1.fna.fbcdn.net/vp/47f53c0f1ed12be0315f7cd660795a7d/5B65A3D3/t51.2885-15/e35/28157080_224062311499733_272915506321686528_n.jpg)](https://www.instagram.com/p/Bf59qRFH2Rw/)
+[![Alt text](https://img.youtube.com/vi/m-ae1GWE0tQ/0.jpg)](https://www.youtube.com/watch?v=m-ae1GWE0tQ)
 
 ## TODOs
 
-### Performance
-- [] Less points (compress old timeline)
-
 ### Missing Features
-- [] Alert/Schedule
-- [] Multiple Plant Support
-- [] Other Sensors
+- [ ] Other Sensors
+- [ ] Configuration Mapping between plants/sensors/hoses
+- [ ] CRUD for sensors/hoses

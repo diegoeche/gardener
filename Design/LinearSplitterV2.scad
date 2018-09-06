@@ -416,7 +416,7 @@ module horn() {
 module myPinion() {
     difference() {
       union() {
-        translate([70, 0, 3]) scale([2.0, 1.4, 2.0]) rotate([90,10,0]) pinion();
+        translate([70, 2, 3]) scale([2.0, 1.4, 2.0]) rotate([90,10,0]) pinion();
         translate([47.5, 10, 25.5]) rotate([180, 0, 0]) horn();
       };
       for(i = [1 : 1 : 4]) {
@@ -425,6 +425,8 @@ module myPinion() {
         translate([70.0, 20, 7.5 + i * 3]) rotate([90]) cylinder(r=1.2, h=80);
         translate([70.0, 20, -1.5 - i * 3]) rotate([90]) cylinder(r=1.2, h=80);    
       }
+      translate([70,4.5,3]) rotate([90]) cylinder(r=3, h=80);
+      
       translate([70 + 10,20,3 + 10]) rotate([90]) cylinder(r=5, h=80);
       translate([70 - 10,20,3 + 10]) rotate([90]) cylinder(r=5, h=80);
       translate([70 + 10,20,3 - 10]) rotate([90]) cylinder(r=5, h=80);
@@ -435,6 +437,6 @@ module myPinion() {
 myPinion();
 top();
 translate([0, 0, 0]) middle();
-!translate([0, 0, 0]) bottom();
-//translate() topBase();
+translate([0, 0, 0]) bottom();
+// translate() topBase();
 

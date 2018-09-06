@@ -140,7 +140,12 @@ SENSOR_TO_HOSE = {
 
 @app.route('/gardener/irrigate/<id>', methods=['POST'])
 def irrigate_plant(id):
-    message = "ok" if irrigate(SENSOR_TO_HOSE[id]) else "locked"
+    amount = request.args.get('amount')
+
+    if amount == None:
+        amount = 0
+
+    message = "ok" if irrigate(SENSOR_TO_HOSE[id], int(amount)) else "locked"
     return jsonify({ "status": message })
 
 

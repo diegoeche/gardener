@@ -61,13 +61,14 @@ def test_positions():
         gardener_lock.release()
 
 
-def irrigate(n):
+def irrigate(n, amount):
     lock_path = "/home/pi/gardener/locks/gardener.txt.lock"
     gardener_lock = FileLock(lock_path, timeout=100)
     try:
         gardener_lock.acquire(timeout=0.1)
         hose(n)
-        pump_water(7)
+        # time.sleep(amount)
+        pump_water(amount)
         return True
     except Timeout:
         return False

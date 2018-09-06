@@ -15,3 +15,15 @@ body {
 .navbar {
   margin-bottom: 20px;
 }
+
+.number-selector {
+    text-align: center;
+    border-radius: 0px 10px 10px 0px;
+}
+
+
+.on-canvas {
+    position: absolute;
+    right: 32px;
+    top: 120px;
+}

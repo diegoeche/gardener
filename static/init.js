@@ -1,7 +1,9 @@
 function processData(data) {
   return data.map(function (x) {
     return { y:x.value, x: new Date(x.time)};
-  })
+  }).filter(function(x) {
+    return x.y !== null;
+  });
 }
 
 function chunk(array, size) {
@@ -134,7 +136,9 @@ $(function () {
     var button = $(this);
     var oldHtml = button.html();
     button.html("Waiting...");
-    $.post("/gardener/irrigate/" + window.sensor.id).done(function (response) {
+    var amount = $("#irrigation-amount").val();
+    var url = "/gardener/irrigate/" + window.sensor.id + "?amount=" + amount;
+    $.post(url).done(function (response) {
       button.html(oldHtml);
     })
   })

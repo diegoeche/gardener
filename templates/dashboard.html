@@ -26,28 +26,35 @@
     </div>
   </nav>
   <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
       <h1 class="h2">{{sensor.name}}</h1>
       <div class="btn-group">
-	<button id="irrigation-button" class="btn btn-info" type="button">
+        <button id="irrigation-button" class="btn btn-info" type="button">
 	  Irrigate
 	</button>
-	<div class="btn-group dropdown">
-	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span data-feather="calendar"></span>
-	    Select Time
-	  </button>
+        <input id="irrigation-amount"
+               class="number-selector"
+               type="number" value="7" min="0" max="100">
 
-	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-	    <a class="dropdown-item" href="#last-hour">Last Hour</a>
-	    <a class="dropdown-item" href="#last-6-hours">Last 6 Hours</a>
-	    <a class="dropdown-item" href="#today">Today</a>
-	    <a class="dropdown-item" href="#historical">All Time</a>
-	  </div>
-	</div>
       </div>
     </div>
-    <canvas id="canvas"></canvas>
+
+    <div class="btn-group dropdown on-canvas">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span data-feather="calendar"></span>
+	Select Time
+      </button>
+
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+	<a class="dropdown-item" href="#last-hour">Last Hour</a>
+	<a class="dropdown-item" href="#last-6-hours">Last 6 Hours</a>
+	<a class="dropdown-item" href="#today">Today</a>
+	<a class="dropdown-item" href="#historical">All Time</a>
+      </div>
+    </div>
+
+    <canvas id="canvas">
+    </canvas>
   </main>
 </div>
 {% endblock %}

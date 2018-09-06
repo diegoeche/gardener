@@ -5,12 +5,15 @@ $(function () {
     var command	  = $("#actionType").val()
     var title	  = $("#actionName").val()
     var frequency = $("#frequency").val()
+    var amount = $("#amount").val()
 
     var data = {
       title: title,
       command: command,
-      frequency: frequency
+      frequency: frequency,
+      amount: amount
     }
+
     console.log(data)
     return $.ajax(url, {
       data       : JSON.stringify(data),

@@ -16,8 +16,12 @@ class GardenerTab:
     def create(params):
         title = params["title"]
         frequency = params["frequency"]
-        comment = "gardener,%s" % title
-        command = COMMANDS[params["command"]]
+        amount = params["amount"]
+        commandId = params["command"]
+
+        comment = ",".join(["gardener", title, commandId, amount])
+
+        command = "%s %s" % (COMMANDS[params["command"]], amount)
 
         job = gardener_tab.new(command=command, comment=comment)
         job.setall(frequency)

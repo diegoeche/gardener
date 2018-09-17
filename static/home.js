@@ -43,24 +43,29 @@ $(function () {
       }
     }
   };
-  var chart = new Chart(ctx, config);
+  window.chart = new Chart(ctx, config);
 
-  $.when(
-    loadData(),
-  ).done(function (data) {
-    console.log(data)
+  var loadAndSetData = function () {
+    $.when(
+      loadData(),
+    ).done(function (data) {
+      console.log(data)
 
-    data = data.map(function (elem) {
-      return {
-	"x": elem.name,
-	"y": elem.value
-      };
-    });
+      data = data.map(function (elem) {
+        return {
+	  "x": elem.name,
+	  "y": elem.value
+        };
+      });
 
-    var dataset = chart.data.datasets[0];
-    chart.data.labels = data.map((x) => x.x)
-    data.forEach((element) => dataset.data.push(element))
-    chart.update()
-    console.log("done");
-  })
+      var dataset = chart.data.datasets[0];
+      dataset.data = [];
+      chart.data.labels = data.map((x) => x.x)
+      data.forEach((element) => dataset.data.push(element))
+      chart.update()
+      console.log("done");
+    })
+  }
+  loadAndSetData();
+  setInterval(loadAndSetData, 2000);
 })

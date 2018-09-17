@@ -26,7 +26,7 @@ def query(sensor_id, page, period):
         period = "historical"
 
     bucket = {
-        "historical": "15m",
+        "historical": "1h",
         "today": "5m",
         "last-6-hours": "1m",
         "last-hour": "1s",

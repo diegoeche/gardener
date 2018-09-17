@@ -7,14 +7,13 @@ import atexit
 
 mh = Raspi_MotorHAT(addr=0x6f)
 
-# recommended for auto-disabling motors on shutdown!
-def turnOffMotors():
-	mh.getMotor(1).run(Raspi_MotorHAT.RELEASE)
-	mh.getMotor(2).run(Raspi_MotorHAT.RELEASE)
-	mh.getMotor(3).run(Raspi_MotorHAT.RELEASE)
-	mh.getMotor(4).run(Raspi_MotorHAT.RELEASE)
-
-atexit.register(turnOffMotors)
+# # recommended for auto-disabling motors on shutdown!
+# def turnOffMotors():
+# 	mh.getMotor(1).run(Raspi_MotorHAT.RELEASE)
+# 	mh.getMotor(2).run(Raspi_MotorHAT.RELEASE)
+# 	mh.getMotor(3).run(Raspi_MotorHAT.RELEASE)
+# 	mh.getMotor(4).run(Raspi_MotorHAT.RELEASE)
+# atexit.register(turnOffMotors)
 
 pwm = PWM(0x6F)
 
@@ -31,9 +30,11 @@ myMotor = mh.getMotor(2)
 myMotor.setSpeed(220)
 
 def hose(n):
-        angles  = [0,80,150, 85 * 3, 87 * 4, 88 * 5]
-        new_position = (servoMax - offset) - (angles[n])
+        angles  = [0, 0, 410, 300, 207, 115]
+        new_position = angles[n]
+        print(new_position)
         pwm.setPWM(0, 0, new_position)
+        last_position = new_position
         time.sleep(1.0)
 
 def pump_water(n):
@@ -66,6 +67,7 @@ def irrigate(n, amount):
     gardener_lock = FileLock(lock_path, timeout=100)
     try:
         gardener_lock.acquire(timeout=0.1)
+        hose(2)
         hose(n)
         # time.sleep(amount)
         pump_water(amount)

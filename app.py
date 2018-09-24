@@ -10,6 +10,7 @@ from datetime import datetime, date, timedelta
 from sqlalchemy.sql.expression import func, select
 
 import json
+from influxdb import InfluxDBClient
 
 app = Flask(__name__)
 
@@ -39,7 +40,36 @@ class Sensor(db.Model):
     name = db.Column(db.String(64), unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('users', lazy=True))
+    min_value = db.Column(db.Integer, default="0")
+    max_value = db.Column(db.Integer, default="1024")
 
 
 def ago(delta):
     return datetime.now() - delta
+
+## Refactor me. Use OO
+client = InfluxDBClient('localhost', 8086, 'root', 'root', 'gardener_db')
+
+def current_value(sensor_id, max_value):
+    if max_value == 1024:
+        query = client.query(
+        """SELECT (1023 - mean(value)) / 1023
+           FROM SENSOR_%s
+           WHERE time > now() - 10m
+        """ % (sensor_id)
+        )
+        try:
+            return query.raw['series'][0]["values"][0][1]
+        except KeyError:
+            return 0
+    else:
+        query = client.query(
+        """SELECT mean(value)
+           FROM SENSOR_%s
+           WHERE time > now() - 10m
+        """ % (sensor_id)
+        )
+        try:
+            return query.raw['series'][0]["values"][0][1]
+        except KeyError:
+            return 0

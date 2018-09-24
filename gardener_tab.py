@@ -18,10 +18,13 @@ class GardenerTab:
         frequency = params["frequency"]
         amount = params["amount"]
         commandId = params["command"]
+        limit = params["limit"]
+        sensor = params["sensor"]
 
-        comment = ",".join(["gardener", title, commandId, amount])
+        comment = ",".join(["gardener", title, commandId, amount, limit, sensor])
 
-        command = "%s %s" % (COMMANDS[params["command"]], amount)
+        checker = "python /home/pi/gardener/has_enough_water.py %s %s &&" % (sensor, limit)
+        command = "%s %s %s" % (checker, COMMANDS[params["command"]], amount)
 
         job = gardener_tab.new(command=command, comment=comment)
         job.setall(frequency)

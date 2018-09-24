@@ -10,7 +10,7 @@
     <div class="col-sm-2">
       <h4>Action</h4>
     </div>
-    <div class="col-sm-1">
+    <div class="col-sm-2">
       <h4>Hose #</h4>
     </div>
     <div class="col-sm-1">
@@ -19,10 +19,14 @@
     <div class="col-sm-1">
       <h4>Slices</h4>
     </div>
+    <div class="col-sm-1">
+      <h4>Limit</h4>
+    </div>
+    <div class="col-sm-1">
+      <h4>Sensor</h4>
+    </div>
     <div class="col-sm-2">
       <h4>Previous</h4>
-    </div>
-    <div class="col-sm-3">
       <h4>Next</h4>
     </div>
   </li>
@@ -30,8 +34,9 @@
   <li class="list-group-item d-flex">
     <div class="col-sm-2">
       <h6 class="my-0">{{job.comment.split(",")[1]}}</h6>
+      <h6 class="my-0" style="display: none">{{job.command}}</h6>
     </div>
-    <div class="col-sm-1">
+    <div class="col-sm-2">
       <span class="text-muted" style="text-align: center">Irrigate: {{job.comment.split(",")[2]}}</span>
     </div>
     <div class="col-sm-1" style="text-align: center">
@@ -40,11 +45,15 @@
     <div class="col-sm-1">
       <span class="text-muted">{{job.slices}}</small>
     </div>
-    <div class="col-sm-2">
-      <span class="text-muted">{{job.schedule().get_prev()}} UTC</span>
+    <div class="col-sm-1">
+      <span class="text-muted">{{job.comment.split(",")[4]}}</small>
+    </div>
+    <div class="col-sm-1">
+      <span class="text-muted">{{job.comment.split(",")[5]}}</small>
     </div>
     <div class="col-sm-2">
-      <span class="text-muted">{{job.schedule().get_next()}} UTC</span>
+      <div class="text-muted">{{job.schedule().get_prev()}} UTC</div>
+      <div class="text-muted">{{job.schedule().get_next()}} UTC</div>
     </div>
 
     <div class="btn-group d-flex">
@@ -83,8 +92,27 @@
 	     id="frequency"
 	     placeholder="* * * * *", value="* * * * *">
     </div>
-    <div class="col-sm-5">
-    <button id="create_job" class="btn btn-primary">Create</button>
+
+    <div class="col-sm-1">
+      <input class="form-control" style="width: 100%"
+	     id="limit"
+	     placeholder="0.6", value="0.6">
+      </input>
+    </div>
+    <div class="col-sm-1">
+      <select class="form-control" id="sensor" style="width:100%">
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+	<option value="5">5</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+    </div>
+    <div class="col-sm-1">
+      <button id="create_job" class="btn btn-primary">Create</button>
+    </div>
   </form>
 </li>
 </ul>

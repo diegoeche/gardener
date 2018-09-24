@@ -5,13 +5,17 @@ $(function () {
     var command	  = $("#actionType").val()
     var title	  = $("#actionName").val()
     var frequency = $("#frequency").val()
+    var limit     = $("#limit").val()
+    var sensor    = $("#sensor").val()
     var amount = $("#amount").val()
 
     var data = {
       title: title,
       command: command,
       frequency: frequency,
-      amount: amount
+      amount: amount,
+      sensor: sensor,
+      limit: limit
     }
 
     console.log(data)

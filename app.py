@@ -10,6 +10,10 @@ from datetime import datetime, date, timedelta
 from sqlalchemy.sql.expression import func, select
 
 import json
+
+def default(o):
+    return o._asdict()
+
 from influxdb import InfluxDBClient
 
 app = Flask(__name__)
@@ -21,7 +25,7 @@ app.config['SECRET_KEY'] = '123456790'
 cache = Cache(app, config={'CACHE_TYPE': 'filesystem', 'CACHE_DIR': "/home/pi/gardener/cache"})
 app.jinja_env.filters['json'] = lambda v: Markup(json.dumps(v))
 
-class NewSensor():
+class Sensor():
     humidity_sensors_count = 12
     all_sensors = [
         {
@@ -46,13 +50,17 @@ class NewSensor():
     def __repr__(self):
         return "(%s, '%s')" %(self.id, self.name)
 
+    def _asdict(self):
+        return {"id": self.id, "name": self.name}
+
     @staticmethod
     def all():
-        return [NewSensor(sensor_data) for sensor_data in NewSensor.all_sensors]
+        return [Sensor(sensor_data) for sensor_data in Sensor.all_sensors]
 
     @staticmethod
     def by_id(id):
-        return NewSensor.all()[id - 1]
+        return Sensor.all()[id - 1]
+
 
 
 class Plant():
@@ -60,22 +68,22 @@ class Plant():
         {
             "id": 1,
             "name": "Basil #1",
-            "sensor_ids": [1],
+            "sensor_ids": [1, 12],
         },
         {
             "id": 2,
             "name": "Parsley #1",
-            "sensor_ids": [2],
+            "sensor_ids": [2, 12],
         },
         {
             "id": 3,
             "name": "Radishes #1",
-            "sensor_ids": [3,4],
+            "sensor_ids": [3,4,12],
         },
         {
             "id": 4,
             "name": "Radishes #2",
-            "sensor_ids": [5,6]
+            "sensor_ids": [5,6,12]
         },
     ]
 
@@ -96,7 +104,7 @@ class Plant():
         return Plant.all()[id - 1]
 
     def sensors(self):
-        return [NewSensor.by_id(sensor_id) for sensor_id in self.sensor_ids]
+        return [Sensor.by_id(sensor_id) for sensor_id in self.sensor_ids]
 
 
 def ago(delta):

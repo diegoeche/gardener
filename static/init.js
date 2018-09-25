@@ -16,25 +16,38 @@ function chunk(array, size) {
   return resultArray;
 }
 
-var config = {
-  type: 'line',
-  data: {
-    datasets: [{
-      label: window.sensor.name,
-      backgroundColor: window.chartColors.blue,
-      borderColor: window.chartColors.blue,
-      data: [],
-      fill: false,
-      showLine: false
-    },
+var datasets = [];
+
+window.sensors.forEach(function (element) {
+  var pointColor = element.name == "Light" ? window.chartColors.yellow : window.chartColors.blue;
+  var avgColor = element.name == "Light" ? window.chartColors.orange : window.chartColors.purple;
+
+
+  datasets.push({
+    label: element.name,
+    backgroundColor: pointColor,
+    borderColor: pointColor,
+    data: [],
+    fill: false,
+    showLine: false,
+    id: element.id
+  });
+  datasets.push(
     {
       label: "Average",
-      backgroundColor: window.chartColors.purple,
-      borderColor: window.chartColors.purple,
+      backgroundColor: avgColor,
+      borderColor: avgColor,
       data: [],
-      fill: false
-    }]
-  },
+      fill: false,
+      id: element.id + "-Avg"
+    }
+  );
+});
+
+
+var config = {
+  type: 'line',
+  data: { datasets: datasets },
   options: {
     responsive: true,
     title: {
@@ -76,7 +89,7 @@ var config = {
 
 var chart;
 
-function addDataToChart(chart, data) {
+function addDataToChart(sensor_id, chart, data) {
   var processedData = processData(data)
   var averageData = chunk(processedData, 20).map(function (x) {
     var sumV = x.reduce(function(a,b) {return a + b.y }, 0)
@@ -87,34 +100,34 @@ function addDataToChart(chart, data) {
     }
   })
 
-  var points = chart.data.datasets[0]
-  var averages = chart.data.datasets[1]
+  var points = chart.data.datasets.find((x) => x.id == sensor_id)
+  var averages = chart.data.datasets.find((x) => x.id == sensor_id + "-Avg")
 
   processedData.forEach((element) => points.data.push(element))
   averageData.forEach((element) => averages.data.push(element))
 }
 
 
-function loadData(page, chart, period) {
-  var url = "/api/sensor/" + window.sensor.id + "?page=" + page + "&period=" + period
+function loadData(sensor_id, page, chart, period) {
+  var url = "/api/sensor/" + sensor_id + "?page=" + page + "&period=" + period
   return $.get(url)
 }
 
-function loadInParallel(i, period) {
+function loadInParallel(sensor_id, i, period) {
   var before = new Date()
   $.when(
-    loadData(i, chart, period),
-    loadData(i + 1, chart, period)
+    loadData(sensor_id, i, chart, period),
+    loadData(sensor_id, i + 1, chart, period)
   ).done(function (a1,a2) {
     // Benchmark:
     // console.log((new Date()).getTime() - before.getTime())
 
     if(a2[0].length > 0) {
-      loadInParallel(i+2, period)
+      loadInParallel(sensor_id, i+2, period)
     }
-    addDataToChart(chart, a1[0])
+    addDataToChart(sensor_id, chart, a1[0])
     chart.update()
-    addDataToChart(chart, a2[0])
+    addDataToChart(sensor_id, chart, a2[0])
     chart.update()
   })
 }
@@ -124,12 +137,19 @@ $(function () {
   chart = new Chart(ctx, config);
   var period = location.hash.substr(1) || "historical"
 
+  var loadAllData = function () {
+    window.sensors.forEach(function (sensor) {
+      loadInParallel(sensor.id, 0, period);
+    })
+  }
+
   $(".dropdown-item").click(function () {
     period = $(this).attr("href").substr(1)
-    chart.data.datasets[0].data = [];
-    chart.data.datasets[1].data = [];
+    chart.data.datasets.forEach(function (dataset){
+      dataset.data = [];
+    });
     chart.update()
-    loadInParallel(0, period);
+    loadAllData();
   })
 
   $("#irrigation-button").click(function () {
@@ -143,5 +163,5 @@ $(function () {
     })
   })
 
-  loadInParallel(0, period);
+  loadAllData();
 })

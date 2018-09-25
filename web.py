@@ -18,7 +18,7 @@ from gardener_tab import GardenerTab
 
 # @cache.memoize(timeout=60 * 5)
 def query(sensor_id, page, period):
-    sensor = NewSensor.by_id(int(sensor_id))
+    sensor = Sensor.by_id(int(sensor_id))
     max_value = sensor.max_value
     page = int(page)
     if period == None:
@@ -51,7 +51,7 @@ def query(sensor_id, page, period):
 
     if max_value == 1:
         query = client.query(
-            """SELECT mean(value)
+            """SELECT 1 - mean(value)
                FROM SENSOR_%s
                WHERE %s AND value <= 1 AND value >= 0
                GROUP BY time(%s) LIMIT %s OFFSET %s;
@@ -67,9 +67,9 @@ def query(sensor_id, page, period):
                 "time": time
             } for (time, value) in query.raw['series'][0]['values']
         ]
-        return jsonify(data)
+        return data
     else:
-        return jsonify([])
+        return []
 
 
 @app.route('/api/sensor/<sensor_id>', methods=['GET'])
@@ -82,17 +82,34 @@ def sensor(sensor_id):
     if period is None:
         period = "historical"
 
-    return query(sensor_id, page, period)
+    return jsonify(query(sensor_id, page, period))
 
 
 @app.route('/api/sensors', methods=['GET'])
 def sensors():
-    sensors = NewSensor.all()
+    sensors = Sensor.all()
     data = [
         {
             "name": sensor.name,
             "value": current_value(sensor.id, sensor.max_value)
         } for sensor in sensors
+    ]
+    return jsonify(data)
+
+@app.route('/api/plants', methods=['GET'])
+def plants():
+    plants = Plant.all()
+    data = [
+        {
+            "id":    plant.id,
+            "name":  plant.name,
+            "sensors": [
+                {
+                    "name": sensor.name,
+                    "value": current_value(sensor.id, sensor.max_value)
+                } for sensor in plant.sensors()
+            ]
+        } for plant in plants
     ]
     return jsonify(data)
 
@@ -118,10 +135,10 @@ def delete_job(id):
 
 @app.route('/')
 def home():
-    sensors = NewSensor.all()
+    plants = Plant.all()
     return render_template(
         'home.html',
-        sensors=sensors
+        plants=plants
     )
 
 # TODO: DRY
@@ -164,12 +181,13 @@ def gardener():
 
 @app.route('/plant/<plant_id>')
 def plant(plant_id):
-    sensor = NewSensor.by_id(int(plant_id))
-    sensors = NewSensor.all()
+    plant = Plant.by_id(int(plant_id))
+    # sensor = Sensor.by_id(int(plant_id))
     return render_template(
         'dashboard.html',
-        sensor=sensor,
-        sensors=sensors,
+        plant=plant,
+        sensors=json.dumps(plant.sensors(), default=default),
+        plants=Plant.all(),
         plant_id=plant_id
     )
 

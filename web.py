@@ -18,6 +18,8 @@ from gardener_tab import GardenerTab
 
 # @cache.memoize(timeout=60 * 5)
 def query(sensor_id, page, period):
+    sensor = NewSensor.by_id(int(sensor_id))
+    max_value = sensor.max_value
     page = int(page)
     if period == None:
         period = "historical"
@@ -38,13 +40,23 @@ def query(sensor_id, page, period):
 
     # SQL Injection: YOLO
     page_size = 100;
+
     query = client.query(
         """SELECT (1023 - mean(value)) / 1023
-           FROM SENSOR_%s
-           WHERE %s
-           GROUP BY time(%s) LIMIT %s OFFSET %s;
+        FROM SENSOR_%s
+        WHERE %s
+        GROUP BY time(%s) LIMIT %s OFFSET %s;
         """ % (sensor_id, where_clause, bucket, page_size, page * page_size)
     )
+
+    if max_value == 1:
+        query = client.query(
+            """SELECT mean(value)
+               FROM SENSOR_%s
+               WHERE %s AND value <= 1 AND value >= 0
+               GROUP BY time(%s) LIMIT %s OFFSET %s;
+            """ % (sensor_id, where_clause, bucket, page_size, page * page_size)
+        )
 
     dictionary = query.raw
 
@@ -75,7 +87,7 @@ def sensor(sensor_id):
 
 @app.route('/api/sensors', methods=['GET'])
 def sensors():
-    sensors = Sensor.query.all()
+    sensors = NewSensor.all()
     data = [
         {
             "name": sensor.name,
@@ -106,7 +118,7 @@ def delete_job(id):
 
 @app.route('/')
 def home():
-    sensors = Sensor.query.all()
+    sensors = NewSensor.all()
     return render_template(
         'home.html',
         sensors=sensors
@@ -152,8 +164,8 @@ def gardener():
 
 @app.route('/plant/<plant_id>')
 def plant(plant_id):
-    sensor = Sensor.query.filter(Sensor.id == plant_id).one()
-    sensors = Sensor.query.all()
+    sensor = NewSensor.by_id(int(plant_id))
+    sensors = NewSensor.all()
     return render_template(
         'dashboard.html',
         sensor=sensor,
@@ -163,5 +175,4 @@ def plant(plant_id):
 
 
 if __name__ == '__main__':
-    db.create_all()
     app.run('0.0.0.0', 8000, debug=True)

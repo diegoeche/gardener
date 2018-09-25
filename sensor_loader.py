@@ -37,7 +37,6 @@ while 1:
           if (parsed_value <= 1024):
             add_to_influxdb(sensor_id, parsed_value)
             sensor_id = sensor_id + 1
-            time.sleep(0.1)
     elif values[0] == "START" and (len(values) == 9):
         sensor_id = 5
         for value in values[1:]:
@@ -45,6 +44,5 @@ while 1:
           if (parsed_value <= 1024):
             add_to_influxdb(sensor_id, parsed_value)
             sensor_id = sensor_id + 1
-            time.sleep(0.1)
 
 ser.close() # Only executes once the loop exits

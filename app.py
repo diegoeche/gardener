@@ -19,29 +19,84 @@ app.config['SECRET_KEY'] = '123456790'
 
 # Check Configuring Flask-Caching section for more details
 cache = Cache(app, config={'CACHE_TYPE': 'filesystem', 'CACHE_DIR': "/home/pi/gardener/cache"})
-
-# Create in-memory database
-app.config['DATABASE_FILE'] = 'sample_db.sqlite'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE_FILE']
-
-app.config['SQLALCHEMY_ECHO'] = True
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.jinja_env.filters['json'] = lambda v: Markup(json.dumps(v))
 
-db = SQLAlchemy(app)
+class NewSensor():
+    humidity_sensors_count = 12
+    all_sensors = [
+        {
+            "id": id,
+            "name": "Humidity %s" % id,
+            "max_value": 1 if (id >= 5) else 1024
+        } for id in range(1, humidity_sensors_count)
+    ]
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    email = db.Column(db.String(128))
+    all_sensors.append(
+        {
+            "id": humidity_sensors_count,
+            "name": "Light",
+            "max_value": 1024
+        }
+    )
+    def __init__(self, attrs):
+        self.id = attrs["id"]
+        self.name = attrs["name"]
+        self.max_value = attrs["max_value"]
 
-class Sensor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref=db.backref('users', lazy=True))
-    min_value = db.Column(db.Integer, default="0")
-    max_value = db.Column(db.Integer, default="1024")
+    def __repr__(self):
+        return "(%s, '%s')" %(self.id, self.name)
+
+    @staticmethod
+    def all():
+        return [NewSensor(sensor_data) for sensor_data in NewSensor.all_sensors]
+
+    @staticmethod
+    def by_id(id):
+        return NewSensor.all()[id - 1]
+
+
+class Plant():
+    all_plants = [
+        {
+            "id": 1,
+            "name": "Basil #1",
+            "sensor_ids": [1],
+        },
+        {
+            "id": 2,
+            "name": "Parsley #1",
+            "sensor_ids": [2],
+        },
+        {
+            "id": 3,
+            "name": "Radishes #1",
+            "sensor_ids": [3,4],
+        },
+        {
+            "id": 4,
+            "name": "Radishes #2",
+            "sensor_ids": [5,6]
+        },
+    ]
+
+    def __init__(self, attrs):
+        self.id = attrs["id"]
+        self.name = attrs["name"]
+        self.sensor_ids = attrs["sensor_ids"]
+
+    def __repr__(self):
+        return "(%s, '%s', %s)" %(self.id, self.name, self.sensors())
+
+    @staticmethod
+    def all():
+        return [Plant(sensor_data) for sensor_data in Plant.all_plants]
+
+    @staticmethod
+    def by_id(id):
+        return Plant.all()[id - 1]
+
+    def sensors(self):
+        return [NewSensor.by_id(sensor_id) for sensor_id in self.sensor_ids]
 
 
 def ago(delta):
@@ -55,7 +110,7 @@ def current_value(sensor_id, max_value):
         query = client.query(
         """SELECT (1023 - mean(value)) / 1023
            FROM SENSOR_%s
-           WHERE time > now() - 10m
+           WHERE time > now() - 1m
         """ % (sensor_id)
         )
         try:
@@ -64,9 +119,9 @@ def current_value(sensor_id, max_value):
             return 0
     else:
         query = client.query(
-        """SELECT mean(value)
+        """SELECT 1.0 - mean(value)
            FROM SENSOR_%s
-           WHERE time > now() - 10m
+           WHERE time > now() - 1m
         """ % (sensor_id)
         )
         try:

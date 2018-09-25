@@ -73,17 +73,27 @@ class Plant():
         {
             "id": 2,
             "name": "Parsley #1",
-            "sensor_ids": [2, 12],
+            "sensor_ids": [2, 10, 12],
         },
         {
             "id": 3,
             "name": "Radishes #1",
-            "sensor_ids": [3,4,12],
+            "sensor_ids": [3,4,9,11,12],
         },
         {
             "id": 4,
             "name": "Radishes #2",
             "sensor_ids": [5,6,12]
+        },
+        {
+            "id": 5,
+            "name": "Baby Basils #1",
+            "sensor_ids": [7,12]
+        },
+        {
+            "id": 6,
+            "name": "Baby Basils #2",
+            "sensor_ids": [8,12]
         },
     ]
 

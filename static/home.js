@@ -44,6 +44,15 @@ $(function () {
             },
             legend: {
               display: false
+            },
+            scales: {
+              yAxes: [{
+                display: true,
+                ticks: {
+                  min: 0,
+                  max: 1.0
+                }
+              }]
             }
           }
         };

@@ -30,7 +30,7 @@ myMotor = mh.getMotor(2)
 myMotor.setSpeed(220)
 
 def hose(n):
-        angles  = [0, 0, 410, 300, 207, 115]
+        angles  = [580, 480, 390, 300, 210]
         new_position = angles[n]
         print(new_position)
         pwm.setPWM(0, 0, new_position)
@@ -67,7 +67,7 @@ def irrigate(n, amount):
     gardener_lock = FileLock(lock_path, timeout=100)
     try:
         gardener_lock.acquire(timeout=0.1)
-        hose(2)
+        # hose(2)
         hose(n)
         # time.sleep(amount)
         pump_water(amount)

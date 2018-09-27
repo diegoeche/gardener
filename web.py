@@ -147,14 +147,6 @@ def test_move():
     message = "ok" if test_positions() else "locked"
     return jsonify({ "status": message })
 
-# TODO: make me data-driven
-SENSOR_TO_HOSE = {
-    "1": 5,
-    "2": 2,
-    "3": 3,
-    "4": 4
-}
-
 @app.route('/gardener/irrigate/<id>', methods=['POST'])
 def irrigate_plant(id):
     amount = request.args.get('amount')
@@ -162,7 +154,7 @@ def irrigate_plant(id):
     if amount == None:
         amount = 0
 
-    message = "ok" if irrigate(SENSOR_TO_HOSE[id], int(amount)) else "locked"
+    message = "ok" if irrigate(int(id), int(amount)) else "locked"
     return jsonify({ "status": message })
 
 

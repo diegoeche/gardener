@@ -34,7 +34,7 @@ window.sensors.forEach(function (element) {
   });
   datasets.push(
     {
-      label: "Average",
+      label: "Avg",
       backgroundColor: avgColor,
       borderColor: avgColor,
       data: [],
@@ -52,7 +52,7 @@ var config = {
     responsive: true,
     title: {
       display: true,
-      text: 'Humidity'
+      text: 'Sensors'
     },
     tooltips: {
       mode: 'index',
@@ -157,7 +157,7 @@ $(function () {
     var oldHtml = button.html();
     button.html("Waiting...");
     var amount = $("#irrigation-amount").val();
-    var url = "/gardener/irrigate/" + window.sensor.id + "?amount=" + amount;
+    var url = "/gardener/irrigate/" + window.hose + "?amount=" + amount;
     $.post(url).done(function (response) {
       button.html(oldHtml);
     })

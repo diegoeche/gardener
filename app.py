@@ -30,7 +30,7 @@ class Sensor():
     all_sensors = [
         {
             "id": id,
-            "name": "Humidity %s" % id,
+            "name": "HUM %s" % id,
             "max_value": 1 if (id >= 5) else 1024
         } for id in range(1, humidity_sensors_count)
     ]
@@ -69,38 +69,39 @@ class Plant():
             "id": 1,
             "name": "Basil #1",
             "sensor_ids": [1, 12],
+            "hose": None
         },
         {
             "id": 2,
             "name": "Parsley #1",
             "sensor_ids": [2, 10, 12],
+            "hose": 3
         },
         {
             "id": 3,
-            "name": "Radishes #1",
-            "sensor_ids": [3,4,9,11,12],
+            "name": "Radishes #2",
+            "sensor_ids": [5,6,12],
+            "hose": 4
         },
         {
             "id": 4,
-            "name": "Radishes #2",
-            "sensor_ids": [5,6,12]
-        },
-        {
-            "id": 5,
             "name": "Baby Basils #1",
-            "sensor_ids": [7,12]
+            "sensor_ids": [3,4,12],
+            "hose": 2
         },
-        {
-            "id": 6,
-            "name": "Baby Basils #2",
-            "sensor_ids": [8,12]
-        },
+        # {
+        #     "id": 3,
+        #     "name": "Radishes #1",
+        #     "sensor_ids": [3,4,9,11,12],
+        #     "archived": True
+        # },
     ]
 
     def __init__(self, attrs):
         self.id = attrs["id"]
         self.name = attrs["name"]
         self.sensor_ids = attrs["sensor_ids"]
+        self.hose = attrs["hose"]
 
     def __repr__(self):
         return "(%s, '%s', %s)" %(self.id, self.name, self.sensors())
